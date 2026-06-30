@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Visual Studio Code — What's New</title>
+<style>
+/* ============================================================
+   VS Code "What's New" — standalone booth carousel
+   Light mode only. Styled after code.visualstudio.com.
+   Single file. No external dependencies. Works fully offline.
+
+   To add your media: drop a screenshot or GIF into ./media/
+   using the exact filename shown on each slide — it swaps in
+   automatically (no code changes needed).
+
+   Controls: Space = play/pause · ← → = navigate · F = fullscreen
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* VS Code website — light theme tokens */
+  --bg: #ffffff;
+  --bg-soft: #f8f8f8;
+  --bg-alt: #f3f3f3;
+  --ink: #242424;          /* headings */
+  --text: #3b3b3b;         /* body */
+  --muted: #616161;        /* secondary */
+  --line: rgba(0, 0, 0, 0.12);
+  --card-bg: #fbfbfb;
+  --card-border: rgba(0, 0, 0, 0.10);
+
+  --accent: #0078d4;       /* per-slide vivid accent (decorative) */
+  --accent-ink: #005fb8;   /* per-slide accessible accent (text/controls) */
+  --accent-hover: #005a9e;
+  --white: #ffffff;
+
+  --font: "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --mono: "Cascadia Code", "Cascadia Mono", "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+html, body { height: 100%; }
+
+body {
+  font-family: var(--font);
+  font-weight: 400;
+  color: var(--text);
+  background: var(--bg);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Subtle site-like background: faint blue dot grid + soft top glow */
+.bg {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(120% 70% at 88% -10%, rgba(0, 120, 212, 0.10), transparent 60%),
+    linear-gradient(180deg, #ffffff 0%, #f8f8f8 100%);
+}
+.bg::after {
+  content: ""; position: absolute; inset: 0;
+  background-image: radial-gradient(rgba(0, 80, 160, 0.10) 1px, transparent 1.4px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse 95% 85% at 50% 40%, #000 50%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 95% 85% at 50% 40%, #000 50%, transparent 100%);
+  opacity: 0.5;
+}
+
+/* ============================================================
+   Carousel shell
+   ============================================================ */
+.carousel { position: fixed; inset: 0; z-index: 1; display: flex; flex-direction: column; }
+
+/* ============================================================
+   Brand mark (product identity only — not interactive)
+   ============================================================ */
+.brandmark {
+  flex: 0 0 auto; z-index: 7;
+  display: flex; align-items: center; justify-content: center; gap: 11px;
+  padding: clamp(12px, 2vh, 20px) 16px clamp(4px, 1vh, 10px);
+  pointer-events: none;
+}
+.brandmark .vscode-logo { width: clamp(26px, 2.6vw, 34px); height: clamp(26px, 2.6vw, 34px); display: block; color: #0078d4; }
+.brandmark .wordmark { font-size: clamp(0.95rem, 1.25vw, 1.15rem); font-weight: 600; color: var(--ink); letter-spacing: 0.1px; white-space: nowrap; }
+.carousel.toc-open .brandmark { display: none; }
+
+/* ============================================================
+   Viewport / slides
+   ============================================================ */
+.viewport { position: relative; flex: 1 1 auto; overflow: hidden; }
+
+.slide {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+  padding: clamp(16px, 3vh, 40px) clamp(28px, 6vw, 96px) clamp(16px, 3vh, 44px);
+  opacity: 0; visibility: hidden; transform: translateY(10px);
+  transition: opacity 0.6s ease, transform 0.6s ease, visibility 0s linear 0.6s;
+}
+.slide.active {
+  opacity: 1; visibility: visible; transform: none;
+  transition: opacity 0.6s ease, transform 0.6s ease, visibility 0s;
+}
+
+.slide-inner {
+  width: 100%; max-width: 1480px;
+  flex: 1 1 auto; min-height: 0;
+  display: grid; grid-template-columns: 1.02fr 1.1fr;
+  gap: clamp(30px, 5vw, 76px); align-items: center;
+}
+
+/* reveal animation (re-triggers each activation) */
+.reveal {
+  opacity: 0; transform: translateY(20px);
+  transition: opacity 0.6s cubic-bezier(.2,.7,.2,1), transform 0.6s cubic-bezier(.2,.7,.2,1);
+  transition-delay: var(--d, 0s);
+}
+.slide.active .reveal { opacity: 1; transform: none; }
+
+/* ============================================================
+   Copy column
+   ============================================================ */
+/* ============================================================
+   Slide title row — the feature name, lifted above the two
+   columns and enlarged. Keeps the per-slide accent color.
+   ============================================================ */
+.slide-title {
+  flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: center; gap: 16px;
+  text-align: center; margin-bottom: clamp(14px, 3vh, 34px);
+  font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--accent-ink);
+}
+.feature-name {
+  font-size: clamp(2.1rem, 4.4vw, 4rem);
+  font-weight: 800; letter-spacing: 0.08em; line-height: 1.04;
+  color: var(--accent-ink); text-wrap: balance;
+}
+
+.subhead {
+  font-size: clamp(2.1rem, 4.4vw, 3.9rem);
+  line-height: 1.06; font-weight: 700; letter-spacing: -0.02em; color: var(--ink);
+  margin-bottom: clamp(14px, 2vh, 22px); text-wrap: balance;
+}
+.lead {
+  font-size: clamp(1.05rem, 1.55vw, 1.5rem);
+  line-height: 1.5; color: var(--muted); max-width: 40ch;
+  margin-bottom: clamp(18px, 3vh, 30px);
+}
+.points { list-style: none; display: grid; gap: 13px; }
+.points li {
+  position: relative; padding-left: 38px;
+  font-size: clamp(1rem, 1.3vw, 1.25rem); line-height: 1.4; color: var(--text);
+}
+.points li::before {
+  content: ""; position: absolute; left: 0; top: 0.05em;
+  width: 24px; height: 24px; border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 16%, #fff);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+}
+.points li::after {
+  content: ""; position: absolute; left: 8.5px; top: 0.28em;
+  width: 6px; height: 11px; border: solid var(--accent-ink);
+  border-width: 0 2.5px 2.5px 0; transform: rotate(45deg);
+}
+.points li b.url-em {
+  color: var(--accent-ink); font-weight: 700; font-family: var(--mono);
+  font-size: 0.94em; white-space: nowrap;
+}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero .slide-inner { grid-template-columns: 1.05fr 1fr; }
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-size: clamp(0.8rem, 1.05vw, 0.98rem); font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-ink);
+  padding: 7px 14px; border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 10%, #fff);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  margin-bottom: 22px;
+}
+.hero-title {
+  font-size: clamp(2.6rem, 6vw, 5.4rem); font-weight: 700; line-height: 1.02;
+  letter-spacing: -0.03em; color: var(--ink); margin-bottom: 18px; text-wrap: balance;
+}
+.hero-title .grad {
+  background: linear-gradient(100deg, #0078d4, #2f9bff 50%, #8a6cff);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.hero-sub {
+  font-size: clamp(1.15rem, 1.9vw, 1.8rem); color: var(--muted);
+  line-height: 1.45; max-width: 30ch; margin-bottom: 28px;
+}
+.chips { display: flex; flex-wrap: wrap; gap: 11px; max-width: 40ch; }
+.chip {
+  font-size: clamp(0.82rem, 1.05vw, 1rem); font-weight: 600; color: var(--ink);
+  padding: 9px 16px; border-radius: 999px;
+  background: var(--bg-soft); border: 1px solid var(--line);
+}
+.chip b { color: var(--accent-ink); font-weight: 700; }
+
+/* ============================================================
+   Screenshot media — transparent PNGs that already have their
+   own rounded corners. No extra frame or crop: just size the
+   image and add a drop shadow that follows its shape.
+   ============================================================ */
+.media {
+  width: 100%; display: flex; align-items: center; justify-content: center;
+}
+.media .shot {
+  display: block; width: 100%; height: auto;
+  max-height: 66vh; object-fit: contain;
+  filter: drop-shadow(0 22px 38px rgba(0, 0, 0, 0.22))
+          drop-shadow(0 4px 10px rgba(0, 0, 0, 0.10));
+}
+
+/* ============================================================
+   iPhone device frame (phone / remote-control slide)
+   Drop a portrait phone screenshot into media/ and it fills
+   the screen automatically.
+   ============================================================ */
+.device {
+  position: relative;
+  height: min(70vh, 600px);
+  aspect-ratio: 9 / 19.5;
+  margin: 0 auto;
+  background: linear-gradient(145deg, #3a3a3d, #161618);
+  border-radius: clamp(34px, 4.4vh, 52px);
+  padding: clamp(8px, 1.1vh, 12px);
+  box-shadow:
+    0 34px 64px -26px rgba(0, 0, 0, 0.5),
+    0 3px 8px rgba(0, 0, 0, 0.22),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.06);
+}
+.device::before { /* inner titanium rim highlight */
+  content: ""; position: absolute; inset: 3px; border-radius: inherit;
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.10); pointer-events: none;
+}
+.device-screen {
+  position: relative; width: 100%; height: 100%;
+  border-radius: clamp(26px, 3.5vh, 42px);
+  overflow: hidden; background: #fff;
+}
+.device-screen .shot {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; display: block; background: #fff; z-index: 2;
+}
+.device-island {
+  position: absolute; top: clamp(9px, 1.3vh, 15px); left: 50%; transform: translateX(-50%);
+  width: 34%; height: clamp(18px, 2.4vh, 28px); background: #000;
+  border-radius: 999px; z-index: 4;
+}
+.device-btn { position: absolute; width: 3px; background: #0c0c0e; border-radius: 2px 0 0 2px; z-index: 0; }
+.device-btn.power   { right: -3px; top: 27%; height: 10%; border-radius: 0 2px 2px 0; }
+.device-btn.vol-up  { left: -3px; top: 23%; height: 7%; }
+.device-btn.vol-down{ left: -3px; top: 32%; height: 7%; }
+
+/* ============================================================
+   Paused indicator (operator keyboard-only; no on-screen UI)
+   ============================================================ */
+.paused-flag {
+  position: fixed; top: 16px; right: 22px; z-index: 6;
+  display: none; align-items: center; gap: 8px;
+  font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  color: #8a5300; background: #fff4e0; border: 1px solid #f0c27a;
+  padding: 7px 13px; border-radius: 999px;
+}
+.carousel.paused .paused-flag { display: inline-flex; }
+.carousel.toc-open .paused-flag { display: none; }
+.paused-flag i { width: 8px; height: 8px; border-radius: 50%; background: #d18616; }
+
+/* ============================================================
+   Table of contents overlay (toggle with the ` backtick key)
+   ============================================================ */
+.toc {
+  position: fixed; inset: 0; z-index: 20;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: clamp(20px, 4vh, 40px); padding: clamp(28px, 6vh, 70px);
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  opacity: 0; visibility: hidden; transform: scale(1.01);
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s linear 0.3s;
+}
+.carousel.toc-open .toc {
+  opacity: 1; visibility: visible; transform: none;
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s;
+}
+.toc-head { text-align: center; }
+.toc-head h2 {
+  font-size: clamp(1.6rem, 3.2vw, 2.6rem); font-weight: 700; color: var(--ink);
+  letter-spacing: -0.02em; margin-bottom: 8px;
+}
+.toc-head p { font-size: clamp(0.9rem, 1.3vw, 1.1rem); color: var(--muted); }
+.toc-head kbd {
+  font-family: var(--mono); font-size: 0.84em; color: var(--ink);
+  background: var(--bg-alt); border: 1px solid var(--line);
+  border-bottom-width: 2px; border-radius: 6px; padding: 1px 7px; margin: 0 2px;
+}
+.toc-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: clamp(12px, 1.6vw, 20px); width: 100%; max-width: 1180px;
+}
+.toc-item {
+  display: flex; align-items: center; gap: 16px; text-align: left;
+  padding: clamp(14px, 1.8vh, 20px) clamp(16px, 1.6vw, 22px);
+  border-radius: 14px; cursor: pointer;
+  background: var(--card-bg); border: 1px solid var(--card-border);
+  font-family: inherit; color: var(--ink);
+  transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.toc-item:hover, .toc-item:focus-visible {
+  transform: translateY(-3px); outline: none;
+  border-color: color-mix(in srgb, var(--toc-accent, #005fb8) 60%, transparent);
+  box-shadow: 0 14px 30px -16px color-mix(in srgb, var(--toc-accent, #005fb8) 70%, transparent);
+}
+.toc-item.current { border-color: var(--toc-accent, #005fb8); }
+.toc-num {
+  flex: none; width: 42px; height: 42px; border-radius: 11px;
+  display: grid; place-items: center; font-size: 1.1rem; font-weight: 800; color: #fff;
+  background: var(--toc-accent, #005fb8);
+}
+.toc-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.toc-text b { font-size: clamp(1rem, 1.2vw, 1.15rem); font-weight: 650; }
+.toc-text span { font-size: 0.82rem; color: var(--muted); }
+
+/* ============================================================
+   Mouse comet trail — VS Code logos in rainbow colors that
+   fade + drift as the cursor moves.
+   ============================================================ */
+.comet-layer { position: fixed; inset: 0; z-index: 15; pointer-events: none; overflow: hidden; }
+.comet {
+  position: fixed; left: 0; top: 0; will-change: transform, opacity; opacity: 0;
+  animation: cometFade var(--life, 900ms) cubic-bezier(.2,.6,.3,1) forwards;
+}
+.comet svg { display: block; width: 100%; height: 100%; }
+@keyframes cometFade {
+  0%   { opacity: .95; transform: translate(-50%, -50%) scale(.35) rotate(var(--rot, 0deg)); }
+  100% { opacity: 0;   transform: translate(-50%, -50%) translate(var(--dx, 0px), var(--dy, 22px)) scale(1) rotate(var(--rot, 0deg)); }
+}
+
+/* ============================================================
+   Reduced motion
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .reveal { transition: none; }
+  .slide, .slide.active { transition: opacity 0.2s linear; transform: none; }
+  .comet-layer { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="bg" aria-hidden="true"></div>
+
+<div class="carousel" id="carousel">
+
+  <!-- ===== Product brand mark (identity only, non-interactive) ===== -->
+  <div class="brandmark" aria-label="Visual Studio Code">
+    <svg class="vscode-logo" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M23.15 2.587 18.21.21a1.494 1.494 0 0 0-1.705.29l-9.46 8.63-4.12-3.128a.999.999 0 0 0-1.276.057L.327 7.261A1 1 0 0 0 .326 8.74L3.899 12 .326 15.26a1 1 0 0 0 .001 1.479L1.65 17.94a.999.999 0 0 0 1.276.057l4.12-3.128 9.46 8.63a1.492 1.492 0 0 0 1.704.29l4.942-2.377A1.5 1.5 0 0 0 24 20.06V3.939a1.5 1.5 0 0 0-.85-1.352zm-5.146 14.861L10.826 12l7.178-5.448v10.896z"/>
+    </svg>
+    <span class="wordmark">Visual Studio Code</span>
+  </div>
+
+  <div class="paused-flag"><i></i> Paused</div>
+  <div class="comet-layer" id="cometLayer" aria-hidden="true"></div>
+
+  <div class="viewport">
+
+    <!-- ============ SLIDE 0 — HERO ============ -->
+    <section class="slide hero active" style="--accent:#0078d4; --accent-ink:#005fb8" data-label="Welcome" data-duration="8000">
+      <div class="slide-inner">
+        <div class="hero-copy">
+          <div class="eyebrow reveal" style="--d:.05s">What's New · 2026</div>
+          <h1 class="hero-title reveal" style="--d:.16s">Your home for <span class="grad">multi&#8209;agent</span> development</h1>
+          <p class="hero-sub reveal" style="--d:.3s">Seven new ways to build with AI agents — right inside Visual Studio Code.</p>
+          <div class="chips reveal" style="--d:.44s">
+            <span class="chip">Agents Window</span>
+            <span class="chip">Bring your own harness</span>
+            <span class="chip">Bring your own key</span>
+            <span class="chip">OpenTelemetry</span>
+            <span class="chip">Integrated Browser</span>
+            <span class="chip">Unified Sessions</span>
+            <span class="chip">Control from your phone</span>
+          </div>
+        </div>
+        <div class="art reveal" style="--d:.34s">
+          <figure class="media">
+            <img class="shot" alt="Visual Studio Code with the Agents window open"
+                 src="media/00-all-agents.png">
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SLIDE 1 — AGENTS WINDOW ============ -->
+    <section class="slide feature" style="--accent:#0078d4; --accent-ink:#005fb8" data-label="Agents Window" data-duration="9000">
+      <header class="slide-title reveal" style="--d:.04s"><h2 class="feature-name">Agents Window</h2></header>
+      <div class="slide-inner">
+        <div class="copy">
+          <p class="subhead reveal" style="--d:.16s">Run a whole team of agents</p>
+          <p class="lead reveal" style="--d:.28s">A dedicated window to launch, watch, and manage multiple coding agents working in parallel — without losing your place.</p>
+          <ul class="points reveal" style="--d:.4s">
+            <li>Kick off many agents at once, each on its own task</li>
+            <li>Live status and progress for every run</li>
+            <li>Jump in, review, and take over any time</li>
+          </ul>
+        </div>
+        <div class="art reveal" style="--d:.32s">
+          <figure class="media">
+            <img class="shot" alt="The Agents window in VS Code running several agents"
+                 src="media/00-all-agents.png">
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SLIDE 2 — HARNESS AGNOSTIC ============ -->
+    <section class="slide feature" style="--accent:#a371f7; --accent-ink:#8250df" data-label="Bring your own harness" data-duration="9000">
+      <header class="slide-title reveal" style="--d:.04s"><h2 class="feature-name">Harness Agnostic</h2></header>
+      <div class="slide-inner">
+        <div class="copy">
+          <p class="subhead reveal" style="--d:.16s">Your agent, your choice</p>
+          <p class="lead reveal" style="--d:.28s">Pick the harness that fits the job — Copilot, Claude, or Codex — all driven by the GitHub Copilot subscription you already have.</p>
+          <ul class="points reveal" style="--d:.4s">
+            <li>Switch harnesses without switching tools</li>
+            <li>One subscription, no extra keys to juggle</li>
+            <li>Use the right model for the right task</li>
+          </ul>
+        </div>
+        <div class="art reveal" style="--d:.32s">
+          <figure class="media">
+            <img class="shot" alt="Choosing between Copilot, Claude, and Codex harnesses"
+                 src="media/02-harness-agnostic.png">
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SLIDE 3 — BRING YOUR OWN KEY ============ -->
+    <section class="slide feature" style="--accent:#3fb950; --accent-ink:#1a7f37" data-label="Bring your own key" data-duration="9000">
+      <header class="slide-title reveal" style="--d:.04s"><h2 class="feature-name">Bring Your Own Key</h2></header>
+      <div class="slide-inner">
+        <div class="copy">
+          <p class="subhead reveal" style="--d:.16s">Your keys. Your models. Even offline.</p>
+          <p class="lead reveal" style="--d:.28s">Connect any provider with your own API key — or run fully air-gapped with local models like Ollama. Sensitive code never has to leave your machine.</p>
+          <ul class="points reveal" style="--d:.4s">
+            <li>Bring your own key for any model provider</li>
+            <li>Run air-gapped &amp; offline with local models — Ollama and more</li>
+            <li>Keep proprietary code on-device with full data control</li>
+          </ul>
+        </div>
+        <div class="art reveal" style="--d:.32s">
+          <figure class="media">
+            <img class="shot" alt="Configuring a custom API key and a local Ollama model"
+                 src="media/03-bring-your-own-key.png">
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SLIDE 4 — OPENTELEMETRY ============ -->
+    <section class="slide feature" style="--accent:#d83b01; --accent-ink:#b5300a" data-label="OpenTelemetry" data-duration="9000">
+      <header class="slide-title reveal" style="--d:.04s"><h2 class="feature-name">OpenTelemetry</h2></header>
+      <div class="slide-inner">
+        <div class="copy">
+          <p class="subhead reveal" style="--d:.16s">See your whole fleet</p>
+          <p class="lead reveal" style="--d:.28s">Collect agent trajectories and usage across every machine with OTel — so you can understand what's happening, optimize, and prove the value.</p>
+          <ul class="points reveal" style="--d:.4s">
+            <li>Trajectories &amp; token usage in one place</li>
+            <li>Roll up metrics across your entire team</li>
+            <li>Standard OpenTelemetry — pipe it anywhere</li>
+          </ul>
+        </div>
+        <div class="art reveal" style="--d:.32s">
+          <figure class="media">
+            <img class="shot" alt="An OpenTelemetry dashboard of agent usage across machines"
+                 src="media/04-opentelemetry.png">
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SLIDE 5 — INTEGRATED BROWSER ============ -->
+    <section class="slide feature" style="--accent:#00b7c3; --accent-ink:#036a92" data-label="Integrated Browser" data-duration="9000">
+      <header class="slide-title reveal" style="--d:.04s"><h2 class="feature-name">Integrated Browser</h2></header>
+      <div class="slide-inner">
+        <div class="copy">
+          <p class="subhead reveal" style="--d:.16s">A real browser, in your editor</p>
+          <p class="lead reveal" style="--d:.28s">A full-featured browser you — or your agent — can drive. Point and click on any element to give the agent precise, visual feedback.</p>
+          <ul class="points reveal" style="--d:.4s">
+            <li>You and the agent share one browser</li>
+            <li>Click an element to point the agent right at it</li>
+            <li>Tighten the loop: build, preview, fix — in place</li>
+          </ul>
+        </div>
+        <div class="art reveal" style="--d:.32s">
+          <figure class="media">
+            <img class="shot" alt="The integrated browser with point-and-click element feedback"
+                 src="media/05-integrated-browser.png">
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SLIDE 6 — UNIFIED SESSIONS / STEERING ============ -->
+    <section class="slide feature" style="--accent:#d18616; --accent-ink:#8a5300" data-label="Unified Sessions" data-duration="9000">
+      <header class="slide-title reveal" style="--d:.04s"><h2 class="feature-name">Unified Sessions</h2></header>
+      <div class="slide-inner">
+        <div class="copy">
+          <p class="subhead reveal" style="--d:.16s">Every session, one view — and you're steering</p>
+          <p class="lead reveal" style="--d:.28s">See agent sessions across your local instance, GitHub Cloud Coding Agent jobs, and more — and steer any of them, live.</p>
+          <ul class="points reveal" style="--d:.4s">
+            <li>Local + cloud sessions, side by side</li>
+            <li>Steer a running agent with a quick instruction</li>
+            <li>Never lose track of work in flight</li>
+          </ul>
+        </div>
+        <div class="art reveal" style="--d:.32s">
+          <figure class="media">
+            <img class="shot" alt="Unified sessions across local and GitHub Cloud, with steering"
+                 src="media/06-unified-sessions.png">
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SLIDE 7 — CONTROL FROM YOUR PHONE ============ -->
+    <section class="slide feature" style="--accent:#e0529c; --accent-ink:#b5246f" data-label="Control from your phone" data-duration="9000">
+      <header class="slide-title reveal" style="--d:.04s"><h2 class="feature-name">Control From Your Phone</h2></header>
+      <div class="slide-inner">
+        <div class="copy">
+          <p class="subhead reveal" style="--d:.16s">Steer your agents from your pocket</p>
+          <p class="lead reveal" style="--d:.28s">Click the broadcast icon in VS Code, then open the agents view on your phone to watch — and steer — every session from anywhere.</p>
+          <ul class="points reveal" style="--d:.4s">
+            <li>Click the broadcast icon in VS Code to start sharing</li>
+            <li>Open <b class="url-em">insiders.vscode.dev/agents</b> on your phone or any browser</li>
+            <li>Watch progress and steer running agents on the go</li>
+          </ul>
+        </div>
+        <div class="art reveal" style="--d:.32s">
+          <div class="device">
+            <span class="device-btn vol-up"></span>
+            <span class="device-btn vol-down"></span>
+            <span class="device-btn power"></span>
+            <div class="device-island"></div>
+            <figure class="device-screen">
+              <img class="shot" alt="Controlling VS Code agent sessions from a phone via insiders.vscode.dev/agents"
+                   src="media/07-control-from-phone.png">
+            </figure>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ===== Table of contents overlay (toggle with ` backtick) ===== -->
+  <div class="toc" id="toc" role="dialog" aria-label="Table of contents" aria-modal="true">
+    <div class="toc-head">
+      <h2>Jump to a slide</h2>
+      <p>Click any feature &middot; press <kbd>`</kbd> to toggle &middot; <kbd>Esc</kbd> to close</p>
+    </div>
+    <div class="toc-grid" id="toc-grid"></div>
+  </div>
+</div>
+
+
+<script>
+(function () {
+  var carousel = document.getElementById('carousel');
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var tocGrid = document.getElementById('toc-grid');
+  var DEFAULT_DUR = 9000;
+
+  var current = 0, paused = false, tocOpen = false, elapsed = 0, last = null;
+
+  function durOf(i) { return parseInt(slides[i].dataset.duration, 10) || DEFAULT_DUR; }
+
+  // ---- Build the table-of-contents entries from the slides ----
+  var tocItems = slides.map(function (s, i) {
+    var accent = (s.style.getPropertyValue('--accent-ink') || '#005fb8').trim();
+    var label = s.dataset.label || ('Slide ' + (i + 1));
+    var headingEl = s.querySelector('.subhead') || s.querySelector('.hero-sub');
+    var heading = headingEl ? headingEl.textContent.trim() : '';
+
+    var item = document.createElement('button');
+    item.className = 'toc-item';
+    item.type = 'button';
+    item.style.setProperty('--toc-accent', accent);
+    item.innerHTML =
+      '<span class="toc-num">' + (i + 1) + '</span>' +
+      '<span class="toc-text"><b></b><span></span></span>';
+    item.querySelector('b').textContent = label;
+    item.querySelector('.toc-text span').textContent = heading;
+    item.addEventListener('click', function () { go(i); closeToc(); });
+    tocGrid.appendChild(item);
+    return item;
+  });
+
+  function markCurrentInToc() {
+    tocItems.forEach(function (it, i) { it.classList.toggle('current', i === current); });
+  }
+
+  function go(i) {
+    slides[current].classList.remove('active');
+    current = (i % slides.length + slides.length) % slides.length;
+    var s = slides[current];
+    s.classList.add('active');
+    carousel.style.setProperty('--accent', (s.style.getPropertyValue('--accent') || '#0078d4').trim());
+    carousel.style.setProperty('--accent-ink', (s.style.getPropertyValue('--accent-ink') || '#005fb8').trim());
+    elapsed = 0;
+    markCurrentInToc();
+  }
+  function next() { go(current + 1); }
+  function prev() { go(current - 1); }
+
+  function frame(ts) {
+    if (last === null) last = ts;
+    var dt = ts - last;
+    last = ts;
+    if (!paused && !tocOpen) {
+      elapsed += dt;
+      if (elapsed >= durOf(current)) next();
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function setPaused(p) {
+    paused = p;
+    carousel.classList.toggle('paused', paused);
+  }
+
+  // ---- Table of contents (toggled with the ` backtick key) ----
+  function openToc() {
+    tocOpen = true;
+    carousel.classList.add('toc-open');
+    markCurrentInToc();
+  }
+  function closeToc() {
+    tocOpen = false;
+    carousel.classList.remove('toc-open');
+    elapsed = 0; last = null; // resume cleanly from the chosen slide
+  }
+  function toggleToc() { tocOpen ? closeToc() : openToc(); }
+
+  // The screen is presenter-driven from a computer: these shortcuts are for
+  // whoever is running the deck (keyboard or presentation clicker).
+  document.addEventListener('keydown', function (e) {
+    switch (e.code) {
+      case 'Backquote': e.preventDefault(); toggleToc(); break;
+      case 'Escape': if (tocOpen) { e.preventDefault(); closeToc(); } break;
+      case 'Space': e.preventDefault(); if (!tocOpen) setPaused(!paused); break;
+      case 'ArrowRight': e.preventDefault(); if (!tocOpen) next(); break;
+      case 'ArrowLeft': e.preventDefault(); if (!tocOpen) prev(); break;
+      case 'Home': e.preventDefault(); closeToc(); go(0); break;
+      case 'KeyF':
+        if (!document.fullscreenElement) {
+          (document.documentElement.requestFullscreen || function () {}).call(document.documentElement);
+        } else {
+          (document.exitFullscreen || function () {}).call(document);
+        }
+        break;
+      default: break;
+    }
+  });
+
+  // Don't fast-forward after the tab was hidden
+  document.addEventListener('visibilitychange', function () { last = null; });
+
+  // ---- Mouse comet trail: rainbow VS Code logos that fade + drift ----
+  (function cometTrail() {
+    var layer = document.getElementById('cometLayer');
+    if (!layer) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    var LOGO = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+      '<path d="M23.15 2.587 18.21.21a1.494 1.494 0 0 0-1.705.29l-9.46 8.63-4.12-3.128a.999.999 0 0 0-1.276.057L.327 7.261A1 1 0 0 0 .326 8.74L3.899 12 .326 15.26a1 1 0 0 0 .001 1.479L1.65 17.94a.999.999 0 0 0 1.276.057l4.12-3.128 9.46 8.63a1.492 1.492 0 0 0 1.704.29l4.942-2.377A1.5 1.5 0 0 0 24 20.06V3.939a1.5 1.5 0 0 0-.85-1.352zm-5.146 14.861L10.826 12l7.178-5.448v10.896z"/></svg>';
+
+    var last = 0, hue = Math.random() * 360, live = 0, MAX = 60;
+
+    function spawn(x, y) {
+      if (live >= MAX) return;
+      var el = document.createElement('div');
+      el.className = 'comet';
+      var size = 14 + Math.random() * 30;
+      hue = (hue + 28 + Math.random() * 26) % 360;
+      el.style.left = x + 'px';
+      el.style.top = y + 'px';
+      el.style.width = size + 'px';
+      el.style.height = size + 'px';
+      el.style.color = 'hsl(' + hue.toFixed(0) + ', 90%, 55%)';
+      el.style.setProperty('--rot', (Math.random() * 140 - 70).toFixed(0) + 'deg');
+      el.style.setProperty('--dx', (Math.random() * 36 - 18).toFixed(0) + 'px');
+      el.style.setProperty('--dy', (14 + Math.random() * 30).toFixed(0) + 'px');
+      el.style.setProperty('--life', (700 + Math.random() * 600).toFixed(0) + 'ms');
+      el.innerHTML = LOGO;
+      layer.appendChild(el);
+      live++;
+      el.addEventListener('animationend', function () { el.remove(); live--; });
+    }
+
+    window.addEventListener('mousemove', function (e) {
+      var now = performance.now();
+      if (now - last < 26) return; // throttle spawn rate
+      last = now;
+      spawn(e.clientX, e.clientY);
+    }, { passive: true });
+  })();
+
+  go(0);
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
