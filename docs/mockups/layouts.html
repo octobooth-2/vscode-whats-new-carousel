@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Carousel layout mockups</title>
+<style>
+/* ============================================================
+   Layout mockups for the What's New carousel. Four layouts
+   (?v=a|b|c|d) share the same slides and the same Blobby tour:
+   Blobby hops to a hotspot on the screenshot for each bullet.
+   Keys: 1-4 layout · ← → slide · Space pause · J jump · F fullscreen
+   Mouse: click Blobby, or click a screenshot to send Blobby there.
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #ffffff; --bg-soft: #f8f8f8; --bg-alt: #f3f3f3;
+  --ink: #242424; --text: #3b3b3b; --muted: #616161;
+  --line: rgba(0, 0, 0, 0.12); --card-border: rgba(0, 0, 0, 0.10);
+  --accent: #0078d4; --accent-ink: #005fb8;
+  --font: "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --mono: "Cascadia Code", "Cascadia Mono", Consolas, monospace;
+  --px: 1.111vh;
+  --bu: 9px;
+}
+html, body { height: 100%; }
+body {
+  font-family: var(--font); color: var(--text); background: var(--bg);
+  overflow: hidden; -webkit-font-smoothing: antialiased;
+}
+.bg {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(120% 70% at 88% -10%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 60%),
+    linear-gradient(180deg, #ffffff 0%, #f8f8f8 100%);
+  transition: background 0.6s;
+}
+.bg::after {
+  content: ""; position: absolute; inset: 0;
+  background-image: radial-gradient(rgba(0, 80, 160, 0.10) 1px, transparent 1.4px);
+  background-size: 40px 40px; opacity: 0.5;
+  mask-image: radial-gradient(ellipse 95% 85% at 50% 40%, #000 50%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 95% 85% at 50% 40%, #000 50%, transparent 100%);
+}
+
+/* ---------- Brand mark ---------- */
+.brandmark {
+  position: fixed; z-index: 6; display: flex; align-items: center; gap: 1vh;
+  pointer-events: none;
+}
+.brandmark svg { width: 3.3vh; height: 3.3vh; color: #0078d4; }
+.brandmark span { font-size: 2.1vh; font-weight: 600; color: var(--ink); white-space: nowrap; }
+.v-a .brandmark { top: 2.2vh; left: 50%; transform: translateX(-50%); }
+.v-b .brandmark, .v-c .brandmark, .v-d .brandmark { top: 3.4vh; left: 4.5vw; }
+
+/* ---------- Slides ---------- */
+.slide {
+  position: absolute; inset: 0; z-index: 1; display: grid;
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.6s ease, visibility 0s linear 0.6s;
+}
+.slide.active { opacity: 1; visibility: visible; transition: opacity 0.6s ease, visibility 0s; }
+.slide.active .title, .slide.active .copy > *, .slide.active .stage {
+  animation: rise 0.7s cubic-bezier(.2,.7,.2,1) both;
+}
+.slide.active .copy > :nth-child(1) { animation-delay: .12s; }
+.slide.active .copy > :nth-child(2) { animation-delay: .22s; }
+.slide.active .copy > :nth-child(3) { animation-delay: .32s; }
+.slide.active .stage { animation-delay: .18s; }
+@keyframes rise { from { opacity: 0; transform: translateY(2.2vh); } to { opacity: 1; transform: none; } }
+
+.title { grid-area: title; display: flex; align-items: center; gap: 1.4vh; min-width: 0; }
+.copy { grid-area: copy; min-width: 0; }
+.feature-name { color: var(--accent-ink); font-weight: 800; text-transform: uppercase; line-height: 1.04; }
+.tag {
+  flex: none; white-space: nowrap; font-size: 1.6vh; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent-ink);
+  padding: 0.5vh 1.1vh; border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 10%, #fff);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+}
+.subhead { color: var(--ink); font-weight: 700; letter-spacing: -0.02em; line-height: 1.06; text-wrap: balance; }
+.lead { color: var(--muted); line-height: 1.45; text-wrap: pretty; }
+
+/* Bullets are numbered steps; the active one lights up while Blobby is on its hotspot. */
+.steps { list-style: none; counter-reset: s; display: grid; gap: 1vh; }
+.steps li {
+  counter-increment: s; position: relative; line-height: 1.35; color: var(--text);
+  padding: 0.9vh 1vw 0.9vh calc(3.9vh + 1.5vw); border-radius: 1.4vh;
+  transition: background 0.35s, opacity 0.35s, color 0.35s, transform 0.35s, border-color 0.35s;
+}
+.steps li::before {
+  content: counter(s); position: absolute; left: 0.6vw; top: 0.8vh;
+  width: 3.9vh; height: 3.9vh; border-radius: 50%;
+  display: grid; place-items: center; font-size: 2vh; font-weight: 800;
+  color: var(--accent-ink); background: color-mix(in srgb, var(--accent) 14%, #fff);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  transition: background 0.35s, color 0.35s;
+}
+.steps li b { color: var(--ink); font-weight: 650; }
+.steps .tag { display: inline-block; font-size: 0.6em; padding: 0.2vh 0.9vh; margin-left: 0.4vh; vertical-align: 0.16em; }
+.slide.touring .steps li { opacity: 0.42; }
+.slide.touring .steps li.on {
+  opacity: 1; color: var(--ink);
+  background: color-mix(in srgb, var(--accent) 9%, #fff);
+}
+.steps li.on::before { background: var(--accent-ink); color: #fff; border-color: transparent; }
+
+/* ---------- Stage: viewer > frame > figure, plus Blobby ---------- */
+.stage { grid-area: stage; position: relative; min-width: 0; min-height: 0; display: grid; align-items: center; justify-items: center; }
+.viewer { position: relative; width: min(100%, calc(var(--mh, 70vh) * var(--ar, 1.78))); }
+.frame { position: relative; transform-origin: 0 0; transition: transform 0.9s cubic-bezier(.6,0,.25,1); }
+.media { position: relative; display: block; }
+.media .shot {
+  display: block; width: 100%; height: auto; border-radius: 1.1vh;
+  filter: drop-shadow(0 2.2vh 3.6vh rgba(0, 0, 0, 0.22)) drop-shadow(0 0.4vh 1vh rgba(0, 0, 0, 0.10));
+}
+.media.duo { padding-bottom: 7%; }
+.media.duo .shot { width: 88%; }
+.media.duo .shot.over { position: absolute; right: 0; bottom: 0; width: var(--over, 50%); }
+.viewer { cursor: crosshair; }
+
+/* Hotspot ring. Positioned by the script in the frame's own pixels. */
+.spot {
+  position: absolute; left: 0; top: 0; z-index: 3; pointer-events: none;
+  width: 4.4vh; height: 4.4vh; margin: -2.2vh 0 0 -2.2vh; border-radius: 50%;
+  border: 0.5vh solid #fff;
+  background: color-mix(in srgb, var(--accent) 45%, transparent);
+  box-shadow: 0 0 0 0.45vh var(--accent), 0 0 3vh 0.6vh color-mix(in srgb, var(--accent) 80%, #fff);
+  opacity: 0; transform: scale(0.3); transition: opacity 0.3s, transform 0.35s cubic-bezier(.3,1.6,.5,1);
+}
+.spot.on { opacity: 1; transform: none; }
+.spot.on::after {
+  content: ""; position: absolute; inset: -1vh; border-radius: 50%;
+  border: 0.45vh solid color-mix(in srgb, var(--accent) 60%, #fff); animation: ping 1.4s ease-out infinite;
+}
+@keyframes ping { from { transform: scale(1); opacity: 0.9; } to { transform: scale(2.3); opacity: 0; } }
+
+/* ============================================================
+   Blobby, the VS Code chat pet. Sprites and frame timings come
+   from microsoft/vscode (see media/blobby/LICENSE-blobby-sprites.txt).
+   A sprite is 12 pixels tall; --u is the size of one of them.
+   Each pose is a spritesheet stepped through by its keyframes,
+   which run only while the slide is showing.
+   ============================================================ */
+.blobby {
+  --u: var(--px);
+  position: relative; display: block; flex: none;
+  width: calc(var(--fw, 12) * var(--u)); height: calc(12 * var(--u));
+  background: var(--sheet) 0 0 / calc(var(--n, 1) * 100%) 100% no-repeat;
+  image-rendering: pixelated;
+}
+/* Sitting on the top edge of a screenshot. */
+.media > .blobby { position: absolute; z-index: 2; bottom: 100%; right: var(--perch, 8%); }
+.media.duo > .blobby { --perch: 22%; }
+.hero .media > .blobby { --u: calc(var(--px) * 1.5); }
+
+/* Some sprites come without eyes (VS Code draws them separately). */
+.blobby.eyes::after {
+  content: ""; position: absolute;
+  left: calc(5 * var(--u)); top: calc(8 * var(--u));
+  width: var(--u); height: calc(2 * var(--u));
+  background: #191a1b; box-shadow: calc(3 * var(--u)) 0 0 #191a1b;
+}
+.blobby.love.eyes::after { top: calc(8.25 * var(--u)); height: calc(1.75 * var(--u)); }
+.slide.active .blobby.eyes::after { animation: blobby-blink 4.6s step-end infinite; }
+@keyframes blobby-blink { 0% { transform: none; } 93% { transform: scaleY(0.15); } 97% { transform: none; } }
+
+.blobby.idle { --sheet: url(../media/blobby/idle.png); --n: 50; }
+.slide.active .blobby.idle { animation: blobby-idle 3460ms step-end infinite; }
+@keyframes blobby-idle {
+  0% { background-position-x: 0%; } 43.35% { background-position-x: 2.04%; }
+  44.51% { background-position-x: 4.08%; } 45.66% { background-position-x: 6.12%; }
+  46.82% { background-position-x: 8.16%; } 47.98% { background-position-x: 10.2%; }
+  49.13% { background-position-x: 12.24%; } 50.29% { background-position-x: 14.29%; }
+  51.45% { background-position-x: 16.33%; } 52.6% { background-position-x: 18.37%; }
+  53.76% { background-position-x: 20.41%; } 54.91% { background-position-x: 22.45%; }
+  56.07% { background-position-x: 24.49%; } 57.23% { background-position-x: 26.53%; }
+  58.38% { background-position-x: 28.57%; } 59.54% { background-position-x: 30.61%; }
+  60.69% { background-position-x: 32.65%; } 61.85% { background-position-x: 34.69%; }
+  63.01% { background-position-x: 36.73%; } 64.16% { background-position-x: 38.78%; }
+  65.32% { background-position-x: 40.82%; } 66.47% { background-position-x: 42.86%; }
+  67.63% { background-position-x: 44.9%; } 68.79% { background-position-x: 46.94%; }
+  69.94% { background-position-x: 48.98%; } 71.1% { background-position-x: 51.02%; }
+  72.25% { background-position-x: 53.06%; } 73.41% { background-position-x: 55.1%; }
+  74.57% { background-position-x: 57.14%; } 75.72% { background-position-x: 59.18%; }
+  76.88% { background-position-x: 61.22%; } 78.03% { background-position-x: 63.27%; }
+  79.19% { background-position-x: 65.31%; } 80.35% { background-position-x: 67.35%; }
+  81.5% { background-position-x: 69.39%; } 82.66% { background-position-x: 71.43%; }
+  83.82% { background-position-x: 73.47%; } 84.97% { background-position-x: 75.51%; }
+  86.13% { background-position-x: 77.55%; } 87.28% { background-position-x: 79.59%; }
+  88.44% { background-position-x: 81.63%; } 89.6% { background-position-x: 83.67%; }
+  90.75% { background-position-x: 85.71%; } 91.91% { background-position-x: 87.76%; }
+  93.06% { background-position-x: 89.8%; } 94.22% { background-position-x: 91.84%; }
+  95.38% { background-position-x: 93.88%; } 96.53% { background-position-x: 95.92%; }
+  97.69% { background-position-x: 97.96%; } 98.84% { background-position-x: 100%; }
+}
+.blobby.love { --sheet: url(../media/blobby/love.png); --n: 6; }
+.slide.active .blobby.love { animation: blobby-love 2940ms step-end infinite; }
+@keyframes blobby-love {
+  0% { background-position-x: 0%; } 6.8% { background-position-x: 20%; }
+  13.61% { background-position-x: 40%; } 26.53% { background-position-x: 60%; }
+  29.93% { background-position-x: 80%; } 32.65% { background-position-x: 100%; }
+}
+.blobby.cool { --sheet: url(../media/blobby/cool.png); --n: 9; }
+.slide.active .blobby.cool { animation: blobby-cool 5360ms step-end infinite; }
+@keyframes blobby-cool {
+  0% { background-position-x: 0%; } 11.19% { background-position-x: 12.5%; }
+  13.43% { background-position-x: 25%; } 15.67% { background-position-x: 37.5%; }
+  17.91% { background-position-x: 50%; } 20.9% { background-position-x: 62.5%; }
+  22.39% { background-position-x: 75%; } 23.88% { background-position-x: 87.5%; }
+  25.37% { background-position-x: 100%; }
+}
+.blobby.sleep { --sheet: url(../media/blobby/sleep.png); --n: 8; --fw: 15; }
+.slide.active .blobby.sleep { animation: blobby-sleep 2400ms step-end infinite; }
+@keyframes blobby-sleep {
+  0% { background-position-x: 0%; } 12.5% { background-position-x: 14.29%; }
+  25% { background-position-x: 28.57%; } 37.5% { background-position-x: 42.86%; }
+  50% { background-position-x: 57.14%; } 62.5% { background-position-x: 71.43%; }
+  75% { background-position-x: 85.71%; } 87.5% { background-position-x: 100%; }
+}
+.blobby.typing { --sheet: url(../media/blobby/typing.png); --n: 2; --fw: 21; }
+.slide.active .blobby.typing { animation: blobby-typing 800ms step-end infinite; }
+@keyframes blobby-typing {
+  0% { background-position-x: 0%; } 40% { background-position-x: 100%; }
+}
+.blobby.painting { --sheet: url(../media/blobby/painting.png); --n: 8; --fw: 24; }
+.slide.active .blobby.painting { animation: blobby-painting 1700ms step-end infinite; }
+@keyframes blobby-painting {
+  0% { background-position-x: 0%; } 14.12% { background-position-x: 14.29%; }
+  23.53% { background-position-x: 28.57%; } 34.12% { background-position-x: 42.86%; }
+  47.06% { background-position-x: 57.14%; } 57.65% { background-position-x: 71.43%; }
+  67.06% { background-position-x: 85.71%; } 81.18% { background-position-x: 100%; }
+}
+.blobby.press-button { --sheet: url(../media/blobby/press-button.png); --n: 6; --fw: 20; }
+.slide.active .blobby.press-button { animation: blobby-press-button 3250ms step-end infinite; }
+@keyframes blobby-press-button {
+  0% { background-position-x: 0%; } 15.38% { background-position-x: 20%; }
+  24.62% { background-position-x: 40%; } 35.38% { background-position-x: 60%; }
+  43.08% { background-position-x: 80%; } 56.92% { background-position-x: 100%; }
+}
+.blobby.clapping { --sheet: url(../media/blobby/clapping.png); --n: 13; }
+.slide.active .blobby.clapping { animation: blobby-clapping 1500ms step-end infinite; }
+@keyframes blobby-clapping {
+  0% { background-position-x: 0%; } 60% { background-position-x: 8.33%; }
+  62.67% { background-position-x: 16.67%; } 65.33% { background-position-x: 25%; }
+  68% { background-position-x: 33.33%; } 73.33% { background-position-x: 41.67%; }
+  76% { background-position-x: 50%; } 78.67% { background-position-x: 58.33%; }
+  81.33% { background-position-x: 66.67%; } 84% { background-position-x: 75%; }
+  89.33% { background-position-x: 83.33%; } 92% { background-position-x: 91.67%; }
+  94.67% { background-position-x: 100%; }
+}
+.blobby.jump { --sheet: url(../media/blobby/jump.png); --n: 6; }
+.slide.active .blobby.jump { animation: blobby-jump 1730ms step-end infinite; }
+@keyframes blobby-jump {
+  0% { background-position-x: 0%; } 69.36% { background-position-x: 20%; }
+  73.99% { background-position-x: 40%; } 79.19% { background-position-x: 60%; }
+  88.44% { background-position-x: 80%; } 94.22% { background-position-x: 100%; }
+}
+/* The last press-button frame has its own winking face. */
+.slide.active .blobby.press-button.eyes::after { animation: blobby-press-eyes 3250ms step-end infinite; }
+@keyframes blobby-press-eyes { 0% { opacity: 1; } 56.92% { opacity: 0; } }
+/* Hats are single frames, so they hop instead. */
+.blobby.chef-hat { --sheet: url(../media/blobby/chef-hat.png); }
+.blobby.hard-hat { --sheet: url(../media/blobby/hard-hat.png); }
+.slide.active .blobby.chef-hat, .slide.active .blobby.hard-hat { animation: blobby-hop 2.6s step-end infinite; }
+@keyframes blobby-hop { 0% { transform: none; } 82% { transform: translateY(calc(-1 * var(--u))); } 91% { transform: none; } }
+
+.stage > .blobby {
+  position: absolute; left: 0; top: 0; z-index: 4; --u: var(--bu);
+  cursor: pointer; transform: translate(-9999px, 0);
+  filter: drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 1.5px #fff) drop-shadow(0 0.8vh 0.8vh rgba(0, 0, 0, 0.3));
+}
+.blobby.hopping { animation: none !important; }
+.blobby.hopping::after { display: none; }
+
+.heart { position: absolute; left: 0; top: 0; z-index: 5; pointer-events: none; width: calc(7 * var(--hu)); height: calc(6 * var(--hu)); animation: heart-up 1.2s ease-out both; }
+.heart svg { display: block; width: 100%; height: 100%; }
+@keyframes heart-up {
+  from { transform: translate(var(--x0), var(--y0)) scale(0.5); opacity: 1; }
+  to   { transform: translate(calc(var(--x0) + var(--dx)), calc(var(--y0) - 13vh)) scale(1.15); opacity: 0; }
+}
+
+/* Speech bubble (layout C). */
+.bubble {
+  position: absolute; left: 0; top: 0; z-index: 5; display: none; pointer-events: none;
+  max-width: 30vw; padding: 1.5vh 1.4vw 1.6vh; border-radius: 1.6vh;
+  font-size: 2.7vh; line-height: 1.32; color: var(--ink); background: #fff;
+  border: 0.3vh solid var(--accent-ink);
+  box-shadow: 0 1.8vh 3.4vh -1.6vh rgba(0, 0, 0, 0.4);
+  opacity: 0; transform: translate(var(--bx, 0), var(--by, 0)) scale(0.85);
+  transform-origin: var(--tail, 50%) 100%;
+  transition: opacity 0.25s, transform 0.3s cubic-bezier(.3,1.5,.5,1);
+}
+.bubble.below { transform-origin: var(--tail, 50%) 0; }
+.bubble.show { opacity: 1; transform: translate(var(--bx, 0), var(--by, 0)); }
+.bubble::after {
+  content: ""; position: absolute; left: var(--tail, 50%); bottom: -1.05vh;
+  width: 1.8vh; height: 1.8vh; margin-left: -0.9vh; background: #fff;
+  border: solid var(--accent-ink); border-width: 0 0.3vh 0.3vh 0; transform: rotate(45deg);
+}
+.bubble.below::after { bottom: auto; top: -1.05vh; border-width: 0.3vh 0 0 0.3vh; }
+.bubble .n {
+  display: inline-grid; place-items: center; width: 3.2vh; height: 3.2vh; margin-right: 0.8vh;
+  border-radius: 50%; background: var(--accent-ink); color: #fff; font-size: 1.8vh; font-weight: 800;
+  vertical-align: 0.25vh;
+}
+.bubble b { font-weight: 650; }
+.bubble .tag { font-size: 0.6em; padding: 0.2vh 0.8vh; vertical-align: 0.2em; }
+
+/* ============================================================
+   Layout A — Rebalanced split. Closest to today: centered brand
+   and big title row, but 34/66 columns, bigger copy and shot.
+   ============================================================ */
+.v-a .slide {
+  grid-template-columns: 34fr 66fr; grid-template-rows: auto 1fr;
+  grid-template-areas: "title title" "copy stage";
+  padding: 8.5vh 4.5vw 4vh; column-gap: 3.5vw; row-gap: 2.5vh;
+}
+.v-a .title { justify-content: center; }
+.v-a .feature-name { font-size: 6.4vh; letter-spacing: 0.08em; }
+.v-a .title .tag { font-size: 1.9vh; }
+.v-a .copy { align-self: center; }
+.v-a .subhead { font-size: 6.2vh; margin-bottom: 2.2vh; }
+.v-a .lead { font-size: 2.85vh; margin-bottom: 3vh; }
+.v-a .steps li { font-size: 2.65vh; }
+.v-a .viewer { --mh: 72vh; }
+
+/* ============================================================
+   Layout B — Full-bleed stage. Title becomes a kicker in the
+   copy column; the screenshot runs off the right edge.
+   ============================================================ */
+.v-b .slide, .v-d .slide {
+  grid-template-rows: 1fr auto auto 1fr;
+  grid-template-areas: ". stage" "title stage" "copy stage" ". stage";
+}
+.v-b .slide { grid-template-columns: 30vw 1fr; padding: 5vh 0 5vh 4.5vw; column-gap: 3vw; }
+.v-b .feature-name, .v-c .feature-name, .v-d .feature-name {
+  font-size: 2.7vh; letter-spacing: 0.16em; display: flex; align-items: center; gap: 1.2vh;
+}
+.v-b .feature-name::before, .v-c .feature-name::before, .v-d .feature-name::before {
+  content: ""; width: 4vh; height: 0.5vh; border-radius: 1vh; background: var(--accent);
+}
+.v-b .title, .v-d .title { margin-bottom: 2.2vh; }
+.v-b .subhead { font-size: 7vh; margin-bottom: 2.4vh; }
+.v-b .lead { font-size: 2.85vh; margin-bottom: 3vh; }
+.v-b .steps li { font-size: 2.65vh; }
+.v-b .stage { justify-items: start; }
+.v-b .viewer {
+  --mh: 82vh; width: min(66vw, calc(var(--mh) * var(--ar, 1.78)));
+  margin-left: max(0px, calc((100% - min(66vw, calc(var(--mh) * var(--ar, 1.78)))) / 2));
+}
+
+/* ============================================================
+   Layout C — Headline + callouts. Headline across the top, the
+   screenshot full width below; bullets become speech bubbles.
+   ============================================================ */
+.v-c .slide {
+  grid-template-columns: 1.15fr 1fr; grid-template-rows: auto auto 1fr;
+  grid-template-areas: "title dots" "sub lead" "stage stage";
+  padding: 9.5vh 5vw 3.5vh; column-gap: 4vw; row-gap: 1.2vh;
+}
+.v-c .copy { display: contents; }
+.v-c .subhead { grid-area: sub; font-size: 6.2vh; align-self: end; }
+.v-c .lead { grid-area: lead; font-size: 2.7vh; align-self: end; max-width: 48ch; }
+.v-c .steps { grid-area: dots; display: flex; justify-content: flex-end; align-items: center; gap: 1vw; }
+.v-c .steps li { font-size: 0; width: 3.9vh; height: 3.9vh; padding: 0; opacity: 1 !important; background: none !important; }
+.v-c .steps li::before { left: 0; top: 0; }
+.v-c .steps li .tag { display: none; }
+.v-c .stage { margin-top: 2.6vh; }
+.v-c .viewer { --mh: 59vh; }
+.v-c .bubble { display: block; }
+
+/* ============================================================
+   Layout D — Zoom tour. Step cards with progress bars; the
+   screenshot zooms into each step's hotspot.
+   ============================================================ */
+.v-d .slide { grid-template-columns: 31vw 1fr; padding: 5vh 3vw 5vh 4.5vw; column-gap: 3.5vw; }
+.v-d .subhead { font-size: 6vh; margin-bottom: 2vh; }
+.v-d .lead { font-size: 2.6vh; margin-bottom: 2.8vh; }
+.v-d .steps { gap: 1.4vh; }
+.v-d .steps li {
+  font-size: 2.45vh; overflow: hidden; background: #fff;
+  padding: 1.6vh 1.2vw 1.9vh calc(3.9vh + 1.7vw);
+  border: 1px solid var(--card-border);
+  box-shadow: 0 1vh 2.2vh -1.6vh rgba(0, 0, 0, 0.25);
+}
+.v-d .steps li::before { left: 0.8vw; top: 1.4vh; }
+.v-d .steps li::after {
+  content: ""; position: absolute; left: 0; bottom: 0; height: 0.55vh;
+  width: calc(var(--p, 0) * 100%); background: var(--accent);
+}
+.v-d .slide.touring .steps li { opacity: 0.6; background: #fff; }
+.v-d .slide.touring .steps li.on {
+  opacity: 1; transform: translateX(0.8vw);
+  border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+  box-shadow: 0 1.4vh 3vh -1.8vh color-mix(in srgb, var(--accent) 80%, transparent);
+}
+.v-d .viewer {
+  --mh: 78vh; overflow: hidden; border-radius: 1.8vh;
+  background: color-mix(in srgb, var(--accent) 7%, #fff);
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  box-shadow: 0 3vh 5vh -3vh rgba(0, 0, 0, 0.35);
+}
+.v-d .media { padding: 2.2vh; }
+.v-d .media.duo { padding-bottom: calc(7% + 2.2vh); }
+.v-d .media.duo .shot.over { right: 2.2vh; bottom: 2.2vh; }
+.v-d .media .shot { filter: drop-shadow(0 1vh 2vh rgba(0, 0, 0, 0.25)); border-radius: 0.9vh; }
+
+/* ---------- Mockup chrome (hidden when embedded) ---------- */
+.hud {
+  position: fixed; z-index: 10; right: 1.6vw; bottom: 1.8vh;
+  display: flex; align-items: center; gap: 1vh;
+  font-size: 1.5vh; color: var(--muted);
+  padding: 0.7vh 0.7vh 0.7vh 1.4vh; border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85); border: 1px solid var(--line);
+  backdrop-filter: blur(8px);
+}
+.hud b { color: var(--ink); }
+.hud button {
+  font: inherit; font-weight: 700; width: 3.2vh; height: 3.2vh; border-radius: 50%;
+  border: 1px solid var(--line); background: #fff; color: var(--ink); cursor: pointer;
+}
+.hud button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+.hud .paused { display: none; color: #8a5300; font-weight: 700; }
+body.paused .hud .paused { display: inline; }
+body.embed .hud { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .slide.active .title, .slide.active .copy > *, .slide.active .stage { animation: none; }
+  .frame { transition: none; }
+  .spot.on::after, .blobby, .blobby::after { animation: none !important; }
+}
+</style>
+</head>
+<body class="v-a">
+<div class="bg" aria-hidden="true"></div>
+
+<div class="brandmark" aria-label="Visual Studio Code">
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.15 2.587 18.21.21a1.494 1.494 0 0 0-1.705.29l-9.46 8.63-4.12-3.128a.999.999 0 0 0-1.276.057L.327 7.261A1 1 0 0 0 .326 8.74L3.899 12 .326 15.26a1 1 0 0 0 .001 1.479L1.65 17.94a.999.999 0 0 0 1.276.057l4.12-3.128 9.46 8.63a1.492 1.492 0 0 0 1.704.29l4.942-2.377A1.5 1.5 0 0 0 24 20.06V3.939a1.5 1.5 0 0 0-.85-1.352zm-5.146 14.861L10.826 12l7.178-5.448v10.896z"/></svg>
+  <span>Visual Studio Code</span>
+</div>
+
+<!-- Each bullet carries its hotspot: which screenshot (data-img), where on it
+     (data-x, data-y as fractions), and Blobby's pose there. -->
+
+<section class="slide" style="--accent:#0078d4; --accent-ink:#005fb8" data-finale="clapping">
+  <header class="title"><h2 class="feature-name">Agents Window</h2></header>
+  <div class="copy">
+    <p class="subhead">Orchestrate a team of agents</p>
+    <p class="lead">Run tasks in parallel across your repositories, follow their progress, and review the changes in one place.</p>
+    <ol class="steps">
+      <li data-x=".62" data-y=".56" data-pose="typing">Each agent works in its own worktree, so changes don't collide</li>
+      <li data-x=".085" data-y=".13" data-pose="cool">Manage agents across all your workspaces and environments</li>
+      <li data-x=".45" data-y=".087" data-pose="press-button">Switch to the editor and back without stopping a session</li>
+    </ol>
+  </div>
+  <div class="stage">
+    <div class="viewer"><div class="frame">
+      <figure class="media"><img class="shot" src="../media/01-agents-window.png" alt="The Agents window showing a session's chat next to its code changes"></figure>
+      <span class="spot"></span>
+    </div></div>
+    <span class="blobby idle" aria-hidden="true"></span>
+    <div class="bubble" aria-hidden="true"></div>
+  </div>
+</section>
+
+<section class="slide" style="--accent:#0e8a6a; --accent-ink:#0b6b53" data-finale="sleep">
+  <header class="title"><h2 class="feature-name">Automations</h2></header>
+  <div class="copy">
+    <p class="subhead">Put recurring work on a schedule</p>
+    <p class="lead">Save a prompt once and let an agent run it for you: summarize repository changes or triage issues without starting each session by hand.</p>
+    <ol class="steps">
+      <li data-img="0" data-x=".36" data-y=".395" data-pose="press-button"><b>In the app:</b> runs on your machine with your tools, hourly, daily, weekly, or by cron</li>
+      <li data-img="1" data-x=".27" data-y=".27" data-pose="cool"><b>On GitHub:</b> runs in the cloud, even when your computer is off <span class="tag">Preview</span></li>
+      <li data-img="1" data-x=".66" data-y=".60" data-pose="typing">Cloud automations can also react to issue and pull request events</li>
+    </ol>
+  </div>
+  <div class="stage">
+    <div class="viewer"><div class="frame">
+      <figure class="media duo" style="--over:40%">
+        <img class="shot" src="../media/02-automations.png" alt="The New automation form in the Agents window with a daily schedule">
+        <img class="shot over" src="../media/02-cloud-automations.png" alt="A cloud automation set to run when an issue is assigned">
+      </figure>
+      <span class="spot"></span>
+    </div></div>
+    <span class="blobby idle" aria-hidden="true"></span>
+    <div class="bubble" aria-hidden="true"></div>
+  </div>
+</section>
+
+<section class="slide" style="--accent:#8a6cff; --accent-ink:#5c3fd6" data-finale="love">
+  <header class="title"><h2 class="feature-name">Agent Merge</h2><span class="tag">Experimental</span></header>
+  <div class="copy">
+    <p class="subhead">From pull request to merged</p>
+    <p class="lead">Agent Merge watches a session's pull request on GitHub and asks the agent to clear whatever is blocking it.</p>
+    <ol class="steps">
+      <li data-x=".5" data-y=".725" data-pose="press-button">Addresses review comments and fixes failed required checks</li>
+      <li data-x=".55" data-y=".46" data-pose="typing">Resolves conflicts and updates a branch that has fallen behind</li>
+      <li data-x=".8" data-y=".92" data-pose="clapping">Merges when ready, or leaves the merge to you</li>
+    </ol>
+  </div>
+  <div class="stage">
+    <div class="viewer"><div class="frame">
+      <figure class="media"><img class="shot" src="../media/03-agent-merge.png" alt="The Create pull request form with Merge Manually, Agent Merge, and Auto-Merge options"></figure>
+      <span class="spot"></span>
+    </div></div>
+    <span class="blobby idle" aria-hidden="true"></span>
+    <div class="bubble" aria-hidden="true"></div>
+  </div>
+</section>
+
+<section class="slide" style="--accent:#4f6bed; --accent-ink:#3b52c4" data-finale="clapping">
+  <header class="title"><h2 class="feature-name">Integrated Browser</h2></header>
+  <div class="copy">
+    <p class="subhead">A browser you and your agent share</p>
+    <p class="lead">Preview your app inside VS Code and share the page with your agent, so it sees what you see.</p>
+    <ol class="steps">
+      <li data-x=".36" data-y=".6" data-pose="painting">Comment on a page element to give the agent precise feedback</li>
+      <li data-x=".595" data-y=".12" data-pose="press-button">The agent runs the app, clicks through it, and fixes what it finds</li>
+      <li data-x=".86" data-y=".34" data-pose="cool">Browser tools are built in, with no MCP server to set up</li>
+    </ol>
+  </div>
+  <div class="stage">
+    <div class="viewer"><div class="frame">
+      <figure class="media"><img class="shot" src="../media/09-integrated-browser.png" alt="The integrated browser showing a page shared with the agent, next to chat"></figure>
+      <span class="spot"></span>
+    </div></div>
+    <span class="blobby idle" aria-hidden="true"></span>
+    <div class="bubble" aria-hidden="true"></div>
+  </div>
+</section>
+
+<div class="hud" id="hud">
+  <span>Mockup · <b id="hud-name"></b> · slide <span id="hud-slide"></span></span>
+  <span class="paused">Paused</span>
+  <button type="button" data-v="a">A</button>
+  <button type="button" data-v="b">B</button>
+  <button type="button" data-v="c">C</button>
+  <button type="button" data-v="d">D</button>
+</div>
+
+<script>
+(function () {
+  var NAMES = { a: 'A · Rebalanced split', b: 'B · Full-bleed stage', c: 'C · Headline + callouts', d: 'D · Zoom tour' };
+  var params = new URLSearchParams(location.search);
+  var variant = NAMES[params.get('v')] ? params.get('v') : 'a';
+  if (params.has('embed')) document.body.classList.add('embed');
+
+  var INTRO = 1100, STEP = 2800, FINALE = 2600, HOP = 820, ZOOM = 1.7;
+  var EYES = ['love', 'typing', 'painting', 'press-button', 'clapping'];
+  var POSES = ['idle', 'love', 'cool', 'sleep', 'typing', 'painting', 'press-button', 'clapping', 'jump'];
+  var WIDTH = { sleep: 15, typing: 21, painting: 24, 'press-button': 20 };
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var HEART = '<svg viewBox="0 0 7 6" shape-rendering="crispEdges"><path fill="#ed1c24" d="M1 0h2v1h1V0h2v1h1v2H6v1H5v1H4v1H3V5H2V4H1V3H0V1h1z"/></svg>';
+
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var cur = 0, t = 0, last = null, paused = false, hold = 0, fired = -1;
+
+  function E(s) {
+    s = s || slides[cur];
+    if (!s._e) {
+      s._e = {
+        slide: s,
+        stage: s.querySelector('.stage'), viewer: s.querySelector('.viewer'),
+        frame: s.querySelector('.frame'), fig: s.querySelector('.media'),
+        shots: Array.prototype.slice.call(s.querySelectorAll('.shot')),
+        spot: s.querySelector('.spot'), blob: s.querySelector('.blobby'),
+        bubble: s.querySelector('.bubble'),
+        steps: Array.prototype.slice.call(s.querySelectorAll('.steps li')),
+        z: { s: 1, tx: 0, ty: 0 }, anims: []
+      };
+    }
+    return s._e;
+  }
+
+  function unit() { return Math.max(4, Math.round(innerHeight / 120)); }
+  function setPixelUnits() {
+    document.documentElement.style.setProperty('--bu', unit() + 'px');
+    document.documentElement.style.setProperty('--px', Math.max(4, Math.round(innerHeight / 90)) + 'px');
+  }
+
+  function setPose(b, pose) {
+    POSES.forEach(function (p) { b.classList.remove(p); });
+    b.classList.remove('eyes');
+    b.classList.add(pose);
+    if (EYES.indexOf(pose) >= 0) b.classList.add('eyes');
+    b._pose = pose;
+  }
+
+  // A point on a screenshot, in the frame's own (unzoomed) pixels.
+  function framePoint(e, i, x, y) {
+    var img = e.shots[i] || e.shots[0];
+    return { x: e.fig.offsetLeft + img.offsetLeft + x * img.offsetWidth,
+             y: e.fig.offsetTop + img.offsetTop + y * img.offsetHeight };
+  }
+  function zoomFor(e, p) {
+    if (variant !== 'd' || !p || reduce) return { s: 1, tx: 0, ty: 0 };
+    var W = e.viewer.clientWidth, H = e.viewer.clientHeight;
+    // Don't upscale low-res screenshots far past their native pixels (keeps text crisp).
+    var native = Math.min.apply(null, e.shots.map(function (img) {
+      return img.naturalWidth / Math.max(1, img.offsetWidth * (devicePixelRatio || 1));
+    }));
+    var s = Math.max(1.25, Math.min(ZOOM, native * 1.3));
+    var tx = Math.min(0, Math.max(W - s * W, W / 2 - s * p.x));
+    var ty = Math.min(0, Math.max(H - s * H, H / 2 - s * p.y));
+    return { s: s, tx: tx, ty: ty };
+  }
+  function applyZoom(e, z) {
+    e.z = z;
+    e.frame.style.transform = z.s === 1 ? '' : 'translate(' + z.tx + 'px,' + z.ty + 'px) scale(' + z.s + ')';
+  }
+  function toStage(e, p, z) {
+    return { x: e.viewer.offsetLeft + z.tx + z.s * p.x, y: e.viewer.offsetTop + z.ty + z.s * p.y };
+  }
+  // Blobby stands beside the ring, on whichever side has more room.
+  function besideSpot(e, sp, z, pose, side) {
+    var R = (e.spot.offsetWidth / 2) * z.s, bw = (WIDTH[pose] || 12) * unit();
+    return { x: sp.x + side * (R + bw / 2 + unit()), y: sp.y + R * 0.7 };
+  }
+  // Sitting on the top edge of the visible part of the screenshot.
+  function perch(e) {
+    var visible = Math.min(e.viewer.offsetWidth, innerWidth - e.viewer.getBoundingClientRect().left);
+    return { x: e.viewer.offsetLeft + visible * 0.82, y: e.viewer.offsetTop };
+  }
+
+  function stopAnims(e) {
+    e.anims.forEach(function (a) { a.onfinish = null; a.cancel(); });
+    e.anims = [];
+    e.blob.classList.remove('hopping');
+  }
+
+  // Hop along a parabola: crouch, take off, fly, land, then take the pose.
+  function moveBlob(e, to, pose, onLand) {
+    var b = e.blob, from = b._pos;
+    var place = function (p) { return 'translate(' + p.x.toFixed(1) + 'px,' + p.y.toFixed(1) + 'px) translate(-50%,-100%)'; };
+    stopAnims(e);
+    b._pos = to;
+    b.style.transform = place(to);
+    if (!from || reduce) { setPose(b, pose); if (onLand) onLand(); return; }
+    var dx = to.x - from.x, dy = to.y - from.y;
+    var h = Math.max(innerHeight * 0.07, Math.min(innerHeight * 0.26, Math.hypot(dx, dy) * 0.38));
+    var c0 = 0.16, c1 = 0.86, kf = [{ offset: 0, transform: place(from) }, { offset: c0, transform: place(from) }];
+    for (var i = 1; i <= 20; i++) {
+      var k = i / 20;
+      kf.push({ offset: c0 + (c1 - c0) * k, transform: place({ x: from.x + dx * k, y: from.y + dy * k - 4 * h * k * (1 - k) }) });
+    }
+    kf.push({ offset: 1, transform: place(to) });
+    setPose(b, 'jump');
+    b.classList.add('hopping');
+    var move = b.animate(kf, { duration: HOP, easing: 'linear' });
+    var sprite = b.animate([
+      { offset: 0, backgroundPositionX: '20%', easing: 'step-end' },
+      { offset: c0, backgroundPositionX: '40%', easing: 'step-end' },
+      { offset: c0 + 0.1, backgroundPositionX: '60%', easing: 'step-end' },
+      { offset: c1, backgroundPositionX: '80%', easing: 'step-end' },
+      { offset: 0.97, backgroundPositionX: '100%' },
+      { offset: 1, backgroundPositionX: '100%' }
+    ], { duration: HOP });
+    e.anims = [move, sprite];
+    move.onfinish = function () {
+      b.classList.remove('hopping');
+      e.anims = [];
+      setPose(b, pose);
+      if (onLand) onLand();
+    };
+  }
+
+  function hearts(e) {
+    var u = Math.max(3, Math.round(unit() * 0.6)), p = e.blob._pos;
+    if (!p) return;
+    for (var i = 0; i < 5; i++) {
+      var h = document.createElement('span');
+      h.className = 'heart';
+      h.innerHTML = HEART;
+      h.style.setProperty('--hu', u + 'px');
+      h.style.setProperty('--x0', (p.x - 3.5 * u + (Math.random() - 0.5) * 8 * u) + 'px');
+      h.style.setProperty('--y0', (p.y - 12 * unit()) + 'px');
+      h.style.setProperty('--dx', ((Math.random() - 0.5) * 16 * u) + 'px');
+      h.style.animationDelay = (i * 90) + 'ms';
+      e.stage.appendChild(h);
+      h.addEventListener('animationend', function () { this.remove(); });
+    }
+  }
+
+  function placeSpot(e, p) {
+    e.spot.style.left = p.x + 'px';
+    e.spot.style.top = p.y + 'px';
+    e.spot.classList.remove('on');
+    void e.spot.offsetWidth;
+    e.spot.classList.add('on');
+  }
+
+  function hideBubble(e) { e.bubble.classList.remove('show'); }
+  function showBubble(e, li, index) {
+    if (variant !== 'c') return;
+    var b = e.bubble, p = e.blob._pos;
+    b.innerHTML = '<span class="n">' + (index + 1) + '</span>' + li.innerHTML;
+    var bw = b.offsetWidth, bh = b.offsetHeight, gap = innerHeight * 0.02;
+    var blobTop = p.y - 12 * unit();
+    var x = Math.max(-e.stage.offsetLeft + 12, Math.min(e.stage.clientWidth - bw, p.x - bw / 2));
+    var y = blobTop - gap - bh, below = y < -innerHeight * 0.04;
+    if (below) y = p.y + gap;
+    b.classList.toggle('below', below);
+    b.style.setProperty('--bx', x + 'px');
+    b.style.setProperty('--by', y + 'px');
+    b.style.setProperty('--tail', Math.max(24, Math.min(bw - 24, p.x - x)) + 'px');
+    b.classList.add('show');
+  }
+
+  function doStep(i) {
+    var e = E(), li = e.steps[i];
+    var fx = parseFloat(li.dataset.x), fy = parseFloat(li.dataset.y);
+    var p = framePoint(e, parseInt(li.dataset.img || '0', 10), fx, fy);
+    var z = zoomFor(e, p);
+    applyZoom(e, z);
+    placeSpot(e, p);
+    hideBubble(e);
+    e.slide.classList.add('touring');
+    e.steps.forEach(function (s, k) { s.classList.toggle('on', k === i); });
+    var sp = toStage(e, p, z), side = fx > 0.7 ? -1 : 1;
+    moveBlob(e, besideSpot(e, sp, z, li.dataset.pose, side), li.dataset.pose, function () { showBubble(e, li, i); });
+  }
+
+  function doFinale() {
+    var e = E();
+    applyZoom(e, { s: 1, tx: 0, ty: 0 });
+    e.spot.classList.remove('on');
+    hideBubble(e);
+    e.slide.classList.remove('touring');
+    e.steps.forEach(function (s) { s.classList.remove('on'); });
+    moveBlob(e, perch(e), e.slide.dataset.finale || 'love', function () { hearts(e); });
+  }
+
+  function reset(s) {
+    var e = E(s);
+    stopAnims(e);
+    applyZoom(e, { s: 1, tx: 0, ty: 0 });
+    e.spot.classList.remove('on');
+    hideBubble(e);
+    s.classList.remove('touring');
+    e.steps.forEach(function (li) { li.classList.remove('on'); li.style.setProperty('--p', 0); });
+    e.blob._pos = null;
+  }
+
+  function stepCount() { return E().steps.length; }
+
+  function go(i) {
+    slides[cur].classList.remove('active');
+    reset(slides[cur]);
+    cur = (i % slides.length + slides.length) % slides.length;
+    var s = slides[cur], e = E(s);
+    reset(s);
+    s.classList.add('active');
+    document.documentElement.style.setProperty('--accent', s.style.getPropertyValue('--accent'));
+    t = 0; fired = -1; hold = 0;
+    moveBlob(e, perch(e), 'idle');
+    document.getElementById('hud-slide').textContent = (cur + 1) + '/' + slides.length;
+  }
+
+  function fire(k) { if (k < stepCount()) doStep(k); else doFinale(); }
+
+  function tick(ts) {
+    var dt = last === null ? 0 : Math.min(100, ts - last);
+    last = ts;
+    if (!paused) {
+      if (hold > 0) hold -= dt; else t += dt;
+      var n = stepCount();
+      while (fired < n && t >= INTRO + (fired + 1) * STEP) fire(++fired);
+      E().steps.forEach(function (li, k) {
+        var p = (t - INTRO - k * STEP) / STEP;
+        li.style.setProperty('--p', fired >= n ? 0 : Math.max(0, Math.min(1, p)).toFixed(3));
+      });
+      if (t >= INTRO + n * STEP + FINALE) go(cur + 1);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function setVariant(v) {
+    variant = v;
+    document.body.classList.remove('v-a', 'v-b', 'v-c', 'v-d');
+    document.body.classList.add('v-' + v);
+    document.getElementById('hud-name').textContent = NAMES[v];
+    Array.prototype.forEach.call(document.querySelectorAll('.hud button'), function (b) {
+      b.classList.toggle('on', b.dataset.v === v);
+    });
+    if (!document.body.classList.contains('embed')) {
+      params.set('v', v);
+      history.replaceState(null, '', '?' + params.toString());
+    }
+    go(cur);
+  }
+
+  function setAspect(fig) {
+    var a = fig.querySelector('.shot');
+    if (!a.naturalWidth) return;
+    var ar = a.naturalWidth / a.naturalHeight;
+    if (fig.classList.contains('duo')) ar = 1 / (0.88 / ar + 0.07);
+    fig.closest('.viewer').style.setProperty('--ar', ar.toFixed(4));
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.media'), function (fig) {
+    var a = fig.querySelector('.shot');
+    if (a.complete) setAspect(fig);
+    a.addEventListener('load', function () {
+      setAspect(fig);
+      if (fig.closest('.slide') === slides[cur] && fired < 0) moveBlob(E(), perch(E()), 'idle');
+    });
+  });
+
+  // Click Blobby for a happy hop; click a screenshot to send Blobby there.
+  slides.forEach(function (s) {
+    var e = E(s);
+    e.blob.addEventListener('click', function (ev) {
+      ev.stopPropagation();
+      if (!e.blob._pos) return;
+      hold = Math.max(hold, 1800);
+      var pose = e.blob._pose === 'jump' ? 'love' : e.blob._pose;
+      moveBlob(e, e.blob._pos, 'love', function () {
+        hearts(e);
+        setTimeout(function () { if (!e.anims.length && e.blob._pose === 'love') setPose(e.blob, pose); }, 1400);
+      });
+    });
+    e.viewer.addEventListener('click', function (ev) {
+      var r = e.stage.getBoundingClientRect();
+      var sp = { x: ev.clientX - r.left, y: ev.clientY - r.top };
+      var p = { x: (sp.x - e.viewer.offsetLeft - e.z.tx) / e.z.s, y: (sp.y - e.viewer.offsetTop - e.z.ty) / e.z.s };
+      placeSpot(e, p);
+      hideBubble(e);
+      hold = Math.max(hold, 3800);
+      var side = p.x > e.frame.offsetWidth * 0.7 ? -1 : 1;
+      moveBlob(e, besideSpot(e, sp, e.z, 'love', side), 'love', function () { hearts(e); });
+    });
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll('.hud button'), function (b) {
+    b.addEventListener('click', function () { setVariant(b.dataset.v); });
+  });
+
+  document.addEventListener('keydown', function (ev) {
+    var map = { Digit1: 'a', Digit2: 'b', Digit3: 'c', Digit4: 'd', KeyA: 'a', KeyB: 'b', KeyC: 'c', KeyD: 'd' };
+    if (map[ev.code]) { setVariant(map[ev.code]); return; }
+    switch (ev.code) {
+      case 'ArrowRight': ev.preventDefault(); go(cur + 1); break;
+      case 'ArrowLeft': ev.preventDefault(); go(cur - 1); break;
+      case 'Space': ev.preventDefault(); paused = !paused; document.body.classList.toggle('paused', paused); break;
+      case 'KeyJ': E().blob.click(); break;
+      case 'KeyF':
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+        else document.exitFullscreen();
+        break;
+    }
+  });
+
+  var resizeTimer;
+  window.addEventListener('resize', function () {
+    setPixelUnits();
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () { go(cur); }, 150);
+  });
+  document.addEventListener('visibilitychange', function () { last = null; });
+
+  setPixelUnits();
+  setVariant(variant);
+  requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>

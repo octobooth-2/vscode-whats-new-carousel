@@ -36,6 +36,7 @@ One full loop takes a little over two minutes.
 | `Space` | Pause / resume auto-rotation |
 | `←` / `→` | Previous / next slide |
 | `Home` | First slide |
+| `J` | Make Blobby jump on a screenshot slide |
 | `F` | Toggle fullscreen |
 | `Esc` | Close the table-of-contents |
 
@@ -59,8 +60,14 @@ code.visualstudio.com.
 
 ## Blobby
 
-Blobby, the VS Code chat pet, sits on the screenshot of most slides and stands in
-the continuity circle. The sprites in `docs/media/blobby/` are VS Code's own
+Blobby, the VS Code chat pet, hops between screenshot hotspots as the matching
+numbered points light up, then returns to its perch. Click Blobby (or press
+**J**) for a happy hop; click a screenshot to send it there. Cropped hotspots
+pan into view. Tours follow each slide's existing duration and pause with
+**Space** or the table of contents. Reduced motion skips hopping animations.
+The continuity circle and recording retain their own animations.
+
+The sprites in `docs/media/blobby/` are VS Code's own
 animation spritesheets (MIT, see the license file in that folder), and the
 keyframes in the page step through them with VS Code's frame timings.
 
@@ -69,12 +76,21 @@ its `<figure class="media">`. The poses are `idle`, `love`, `cool`, `sleep`,
 `typing`, `painting`, `press-button`, `clapping`, `jump`, `chef-hat`, and
 `hard-hat`. Add the `eyes` class to `love`, `typing`, `painting`,
 `press-button`, and `clapping`, whose sprites come without eyes.
+On screenshot slides with points, give each `<li>` a `data-x` and `data-y`
+hotspot (fractions from 0 to 1), a `data-pose`, and an optional zero-based
+`data-img` for paired screenshots.
 
 ## Display size
 
-The layout is tuned for a 1920×1080 viewport and is capped at 1480px wide. On a
-4K display running at 100% scaling, zoom the browser (for example to 200%) so
-the content fills the screen.
+The deck uses layout B: a centered VS Code wordmark, a small feature label
+above larger left-hand copy, and taller screenshots bleeding off the right
+edge. Screenshots are bounded by 82% of the viewport height; portrait and
+paired media keep their proportions. The continuity video remains uncropped.
+
+The layout is tuned for 16:9 displays and scales with the viewport, including
+1920×1080 and 4K, without the old 1480px width cap.
+
+The original four layout studies remain in `docs/mockups/index.html`.
 
 ## GitHub Pages
 

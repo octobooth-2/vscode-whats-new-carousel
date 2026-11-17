@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Carousel layout mockups — review</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  color: #3b3b3b; background: #f3f3f3; padding: 28px 32px 40px;
+  -webkit-font-smoothing: antialiased;
+}
+header { max-width: 1800px; margin: 0 auto 22px; }
+h1 { font-size: 1.7rem; color: #242424; letter-spacing: -0.01em; margin-bottom: 6px; }
+header p { color: #616161; font-size: 1rem; line-height: 1.5; max-width: 110ch; }
+kbd {
+  font-family: "Cascadia Code", Consolas, monospace; font-size: 0.85em; color: #242424;
+  background: #fff; border: 1px solid rgba(0,0,0,.15); border-bottom-width: 2px; border-radius: 5px; padding: 0 6px;
+}
+.grid { max-width: 1800px; margin: 0 auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.card {
+  background: #fff; border: 1px solid rgba(0,0,0,.10); border-radius: 14px; overflow: hidden;
+  box-shadow: 0 10px 30px -18px rgba(0,0,0,.35);
+}
+.thumb { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border-bottom: 1px solid rgba(0,0,0,.08); }
+.thumb iframe {
+  position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; border: 0;
+  transform-origin: 0 0; transform: scale(var(--k, 0.4));
+}
+.info { display: flex; gap: 18px; align-items: flex-start; padding: 16px 18px 18px; }
+.letter {
+  flex: none; width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center;
+  font-weight: 800; font-size: 1.2rem; color: #fff; background: #005fb8;
+}
+.info h2 { font-size: 1.15rem; color: #242424; margin-bottom: 4px; }
+.info p { font-size: 0.95rem; line-height: 1.5; color: #555; }
+.info ul { margin: 6px 0 0 18px; font-size: 0.92rem; line-height: 1.5; color: #555; }
+.info .open {
+  flex: none; margin-left: auto; align-self: center; white-space: nowrap;
+  font-weight: 600; font-size: 0.92rem; color: #005fb8; text-decoration: none;
+  border: 1px solid rgba(0,95,184,.35); border-radius: 999px; padding: 7px 14px;
+}
+.info .open:hover { background: #eef5fc; }
+@media (max-width: 1100px) { .grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>What's New carousel — 4 layout mockups</h1>
+  <p>Each mockup plays the same four slides (Agents Window, Automations, Agent Merge, Integrated Browser).
+     In all four, Blobby demos the workflow: it hops to a hotspot on the screenshot for each bullet while that bullet lights up,
+     then hops back to its perch for a finale pose. <b>Click Blobby</b> to make it jump, or <b>click anywhere on a screenshot</b> to send Blobby there.
+     Open one full screen to review at booth size; there, <kbd>1</kbd>–<kbd>4</kbd> switch layouts, <kbd>←</kbd> <kbd>→</kbd> change slides, <kbd>Space</kbd> pauses.</p>
+</header>
+
+<div class="grid">
+  <section class="card">
+    <div class="thumb"><iframe src="layouts.html?v=a&amp;embed=1" title="Layout A preview" loading="eager"></iframe></div>
+    <div class="info">
+      <span class="letter">A</span>
+      <div>
+        <h2>Rebalanced split</h2>
+        <p>Closest to today. Keeps the centered brand and big feature title, but shifts the columns to 34 / 66.</p>
+        <ul>
+          <li>Screenshot about <b>1.5×</b> wider than now; copy about 25% bigger</li>
+          <li>Bullets become numbered steps that light up as Blobby visits each one</li>
+        </ul>
+      </div>
+      <a class="open" href="layouts.html?v=a" target="_blank">Open full screen ↗</a>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="thumb"><iframe src="layouts.html?v=b&amp;embed=1" title="Layout B preview" loading="eager"></iframe></div>
+    <div class="info">
+      <span class="letter">B</span>
+      <div>
+        <h2>Full-bleed stage</h2>
+        <p>The feature name becomes a small kicker above the headline, freeing the top of the screen for the screenshot.</p>
+        <ul>
+          <li>Screenshot about <b>1.75×</b> wider, bleeding off the right edge</li>
+          <li>Largest headline of the four; same step highlighting as A</li>
+        </ul>
+      </div>
+      <a class="open" href="layouts.html?v=b" target="_blank">Open full screen ↗</a>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="thumb"><iframe src="layouts.html?v=c&amp;embed=1" title="Layout C preview" loading="eager"></iframe></div>
+    <div class="info">
+      <span class="letter">C</span>
+      <div>
+        <h2>Headline + callouts</h2>
+        <p>Headline and lead across the top, the screenshot centered and full width below.</p>
+        <ul>
+          <li>Screenshot about <b>1.6×</b> wider, nothing beside it</li>
+          <li>Bullets become speech bubbles that Blobby carries to each part of the UI</li>
+        </ul>
+      </div>
+      <a class="open" href="layouts.html?v=c" target="_blank">Open full screen ↗</a>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="thumb"><iframe src="layouts.html?v=d&amp;embed=1" title="Layout D preview" loading="eager"></iframe></div>
+    <div class="info">
+      <span class="letter">D</span>
+      <div>
+        <h2>Zoom tour</h2>
+        <p>Bullets become step cards with progress bars, like stories. The screenshot sits in a framed viewer.</p>
+        <ul>
+          <li>Viewer zooms <b>1.7×</b> into each step's hotspot, so small UI is readable across the booth</li>
+          <li>Blobby rides along to the zoomed spot, then the view zooms back out</li>
+        </ul>
+      </div>
+      <a class="open" href="layouts.html?v=d" target="_blank">Open full screen ↗</a>
+    </div>
+  </section>
+</div>
+
+<script>
+// Scale each 1920×1080 preview to its card.
+var thumbs = document.querySelectorAll('.thumb');
+var ro = new ResizeObserver(function () {
+  thumbs.forEach(function (t) { t.style.setProperty('--k', t.clientWidth / 1920); });
+});
+thumbs.forEach(function (t) { ro.observe(t); });
+</script>
+</body>
+</html>

@@ -80,13 +80,12 @@ body {
    Brand mark (product identity only — not interactive)
    ============================================================ */
 .brandmark {
-  flex: 0 0 auto; z-index: 7;
+  position: absolute; top: 2.2vh; left: 50%; transform: translateX(-50%); z-index: 7;
   display: flex; align-items: center; justify-content: center; gap: 11px;
-  padding: clamp(12px, 2vh, 20px) 16px clamp(4px, 1vh, 10px);
   pointer-events: none;
 }
-.brandmark .vscode-logo { width: clamp(26px, 2.6vw, 34px); height: clamp(26px, 2.6vw, 34px); display: block; color: #0078d4; }
-.brandmark .wordmark { font-size: clamp(0.95rem, 1.25vw, 1.15rem); font-weight: 600; color: var(--ink); letter-spacing: 0.1px; white-space: nowrap; }
+.brandmark .vscode-logo { width: 3.3vh; height: 3.3vh; display: block; color: #0078d4; }
+.brandmark .wordmark { font-size: 2.1vh; font-weight: 600; color: var(--ink); letter-spacing: 0.1px; white-space: nowrap; }
 .carousel.toc-open .brandmark { display: none; }
 
 /* ============================================================
@@ -96,8 +95,10 @@ body {
 
 .slide {
   position: absolute; inset: 0;
-  display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-  padding: clamp(16px, 3vh, 40px) clamp(28px, 6vw, 96px) clamp(16px, 3vh, 44px);
+  display: grid; grid-template-columns: 30vw minmax(0, 1fr);
+  grid-template-rows: 1fr auto auto 1fr;
+  grid-template-areas: ". art" "title art" "copy art" ". art";
+  padding: 10vh 0 3vh 4.5vw; column-gap: 3vw;
   opacity: 0; visibility: hidden; transform: translateY(10px);
   transition: opacity 0.6s ease, transform 0.6s ease, visibility 0s linear 0.6s;
 }
@@ -106,11 +107,12 @@ body {
   transition: opacity 0.6s ease, transform 0.6s ease, visibility 0s;
 }
 
-.slide-inner {
-  width: 100%; max-width: 1480px;
-  flex: 1 1 auto; min-height: 0;
-  display: grid; grid-template-columns: 1.02fr 1.1fr;
-  gap: clamp(30px, 5vw, 76px); align-items: center;
+.slide-inner { display: contents; }
+.copy, .hero-copy { grid-area: copy; min-width: 0; }
+.art {
+  grid-area: art; min-width: 0; align-self: center; position: relative;
+  /* Allow the right-edge bleed and Blobby's perch, but not overlap with copy. */
+  clip-path: inset(-14vh -100vw -4vh 0);
 }
 
 /* reveal animation (re-triggers each activation) */
@@ -125,28 +127,32 @@ body {
    Copy column
    ============================================================ */
 /* ============================================================
-   Slide title row — the feature name, lifted above the two
-   columns and enlarged. Keeps the per-slide accent color.
+   Layout B: the feature name is a kicker above the left headline.
    ============================================================ */
 .slide-title {
-  flex: 0 0 auto;
-  display: flex; align-items: center; justify-content: center; gap: 16px;
-  text-align: center; margin-bottom: clamp(14px, 3vh, 34px);
+  grid-area: title;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 1.2vh;
+  margin-bottom: 2.2vh;
   font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
   color: var(--accent-ink);
 }
 .feature-name {
-  font-size: clamp(2.1rem, 4.4vw, 4rem);
-  font-weight: 800; letter-spacing: 0.08em; line-height: 1.04;
+  display: flex; align-items: center; gap: 1.2vh;
+  font-size: 2.7vh;
+  font-weight: 800; letter-spacing: 0.16em; line-height: 1.15;
   color: var(--accent-ink); text-wrap: balance;
+}
+.feature-name::before {
+  content: ""; flex: none; width: 4vh; height: 0.5vh;
+  border-radius: 1vh; background: var(--accent);
 }
 
 /* Release-status pill: next to a slide title, or inline in a bullet. */
 .tag {
   flex: none; white-space: nowrap;
-  font-size: clamp(0.72rem, 1vw, 0.95rem); font-weight: 700;
+  font-size: 1.6vh; font-weight: 700;
   letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent-ink);
-  padding: 6px 13px; border-radius: 999px;
+  padding: 0.5vh 1.1vh; border-radius: 999px;
   background: color-mix(in srgb, var(--accent) 10%, #fff);
   border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
 }
@@ -156,31 +162,32 @@ body {
 }
 
 .subhead {
-  font-size: clamp(2.1rem, 4.4vw, 3.9rem);
+  font-size: 6.6vh;
   line-height: 1.06; font-weight: 700; letter-spacing: -0.02em; color: var(--ink);
-  margin-bottom: clamp(14px, 2vh, 22px); text-wrap: balance;
+  margin-bottom: 2.4vh; text-wrap: balance;
 }
 .lead {
-  font-size: clamp(1.05rem, 1.55vw, 1.5rem);
-  line-height: 1.5; color: var(--muted); max-width: 40ch;
-  margin-bottom: clamp(18px, 3vh, 30px); text-wrap: pretty;
+  font-size: 2.85vh;
+  line-height: 1.45; color: var(--muted);
+  margin-bottom: 3vh; text-wrap: pretty;
 }
-.points { list-style: none; display: grid; gap: 13px; }
+.points { list-style: none; display: grid; gap: 1vh; counter-reset: step; }
 .points li {
-  position: relative; padding-left: 38px;
-  font-size: clamp(1rem, 1.3vw, 1.25rem); line-height: 1.4; color: var(--text);
+  counter-increment: step; position: relative;
+  padding: 0.9vh 0.7vw 0.9vh calc(3.9vh + 1.3vw); border-radius: 1.4vh;
+  font-size: 2.6vh; line-height: 1.35; color: var(--text);
+  transition: background 0.3s, opacity 0.3s;
 }
 .points li::before {
-  content: ""; position: absolute; left: 0; top: 0.05em;
-  width: 24px; height: 24px; border-radius: 50%;
+  content: counter(step); position: absolute; left: 0.5vw; top: 0.8vh;
+  width: 3.9vh; height: 3.9vh; border-radius: 50%;
+  display: grid; place-items: center; font-size: 2vh; font-weight: 800; color: var(--accent-ink);
   background: color-mix(in srgb, var(--accent) 16%, #fff);
   border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
 }
-.points li::after {
-  content: ""; position: absolute; left: 8.5px; top: 0.28em;
-  width: 6px; height: 11px; border: solid var(--accent-ink);
-  border-width: 0 2.5px 2.5px 0; transform: rotate(45deg);
-}
+.slide.touring .points li { opacity: 0.48; }
+.slide.touring .points li.on { opacity: 1; background: color-mix(in srgb, var(--accent) 9%, #fff); }
+.points li.on::before { background: var(--accent-ink); color: #fff; border-color: transparent; }
 .points li b { color: var(--ink); font-weight: 650; }
 .points li b.mono-em {
   color: var(--accent-ink); font-weight: 700; font-family: var(--mono);
@@ -190,10 +197,10 @@ body {
 /* ============================================================
    HERO
    ============================================================ */
-.hero .slide-inner { grid-template-columns: 1.05fr 1fr; }
+.hero { grid-template-areas: ". art" "copy art" "copy art" ". art"; }
 .eyebrow {
   display: inline-flex; align-items: center; gap: 10px;
-  font-size: clamp(0.8rem, 1.05vw, 0.98rem); font-weight: 700;
+  font-size: 1.8vh; font-weight: 700;
   letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-ink);
   padding: 7px 14px; border-radius: 999px;
   background: color-mix(in srgb, var(--accent) 10%, #fff);
@@ -201,7 +208,7 @@ body {
   margin-bottom: 22px;
 }
 .hero-title {
-  font-size: clamp(2.4rem, 5vw, 4.8rem); font-weight: 700; line-height: 1.02;
+  font-size: 7.2vh; font-weight: 700; line-height: 1.02;
   letter-spacing: -0.03em; color: var(--ink); margin-bottom: 18px; text-wrap: balance;
 }
 .hero-title .grad {
@@ -209,27 +216,30 @@ body {
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
 .hero-sub {
-  font-size: clamp(1.15rem, 1.9vw, 1.8rem); color: var(--muted);
+  font-size: 2.85vh; color: var(--muted);
   line-height: 1.45; max-width: 30ch; margin-bottom: 28px;
 }
 .chips { display: flex; flex-wrap: wrap; gap: 11px; max-width: 46rem; }
 .chip {
-  font-size: clamp(0.82rem, 1.05vw, 1rem); font-weight: 600; color: var(--ink);
-  padding: 9px 16px; border-radius: 999px;
+  font-size: 1.7vh; font-weight: 600; color: var(--ink);
+  padding: 0.8vh 1.2vh; border-radius: 999px;
   background: var(--bg-soft); border: 1px solid var(--line);
 }
 .chip b { color: var(--accent-ink); font-weight: 700; }
 
 /* ============================================================
-   Screenshot media. A figure with one screenshot is sized from
-   that screenshot's aspect ratio (--ar, set by the script at the
-   bottom), so it fills the column without growing taller than
-   --mh. The figure is exactly as big as the screenshot, which
-   lets Blobby sit on its top edge.
+   Taller full-bleed screenshots, bounded by height. Portraits and
+   paired images retain their aspect ratios. Tours pan any cropped
+   hotspot into view without moving the copy column.
    ============================================================ */
 .media {
+  --mh: 82vh;
+  --media-width: min(76vw, calc(var(--mh) * var(--ar, 1.78)));
   position: relative; display: flex; align-items: center; justify-content: center;
-  width: min(100%, calc(var(--mh, 62vh) * var(--ar, 1.78))); margin-inline: auto;
+  width: var(--media-width);
+  margin-left: max(0px, calc((100% - var(--media-width)) / 2));
+  transform: translateX(var(--pan, 0px)); transition: transform 0.75s cubic-bezier(.2,.7,.2,1);
+  cursor: crosshair;
 }
 .media .shot {
   display: block; height: auto; width: 100%;
@@ -241,15 +251,15 @@ body {
 /* Two screenshots, one above the other. The width cap keeps the
    pair within the slide height. */
 .media.stack {
-  flex-direction: column; gap: clamp(14px, 2.4vh, 26px);
-  width: min(100%, 96vh);
+  flex-direction: column; gap: 2vh;
+  --media-width: min(76vw, calc((var(--mh) - 2vh) * var(--ar, 1)));
 }
 
 /* Two screenshots as a collage: the second (.over) overlaps the
    bottom-right corner of the first. */
 .media.duo {
   position: relative; display: block;
-  width: min(100%, 104vh); padding-bottom: 7%;
+  aspect-ratio: var(--ar, 1.5);
 }
 .media.duo .shot { width: 88%; }
 .media.duo .shot.over { position: absolute; right: 0; bottom: 0; width: var(--over, 50%); }
@@ -266,17 +276,20 @@ body {
    Wide slide: headline and lead side by side, with full-width
    media below them.
    ============================================================ */
-.slide.wide .slide-inner {
-  grid-template-columns: 1fr; align-content: center;
-  gap: clamp(10px, 2vh, 22px);
+.slide.wide {
+  grid-template-columns: 1fr; grid-template-rows: auto auto minmax(0, 1fr);
+  grid-template-areas: "title" "copy" "art";
+  padding: 10vh 4.5vw 3vh; row-gap: 2vh;
 }
+.slide.wide .slide-title { margin-bottom: 0; }
 .slide.wide .copy {
   display: grid; grid-template-columns: auto minmax(0, 1fr);
   gap: clamp(24px, 4vw, 72px); align-items: center;
 }
-.slide.wide .subhead { font-size: clamp(1.8rem, 3.5vw, 3.2rem); margin-bottom: 0; }
+.slide.wide .subhead { font-size: 5.4vh; margin-bottom: 0; }
 .slide.wide .lead { max-width: 56ch; margin-bottom: 0; }
-.slide.wide .media { --mh: 54vh; }
+.slide.wide .media { --mh: 62vh; --media-width: min(100%, calc(var(--mh) * var(--ar, 1.78))); margin-inline: auto; cursor: default; }
+.slide.wide .art { clip-path: none; }
 
 /* ============================================================
    Blobby, the VS Code chat pet. Sprites and frame timings come
@@ -295,7 +308,22 @@ body {
 /* Sitting on the top edge of a screenshot. */
 .media > .blobby { position: absolute; z-index: 2; bottom: 100%; right: var(--perch, 8%); }
 .media.duo > .blobby { --perch: 22%; }
-.hero .media > .blobby { --u: calc(var(--px) * 1.5); }
+.media > .blobby {
+  --u: var(--bu, 9px); bottom: auto; right: auto; left: 0; top: 0;
+  cursor: pointer;
+  filter: drop-shadow(0 0 1px #fff) drop-shadow(0 0.8vh 0.8vh rgba(0, 0, 0, 0.3));
+}
+.media > .blobby:focus-visible { outline: 3px solid var(--accent-ink); outline-offset: 4px; }
+.slide.active .blobby.hopping { animation: none; }
+.slide.active .media > .blobby.chef-hat, .slide.active .media > .blobby.hard-hat { animation: none; }
+.spot {
+  position: absolute; z-index: 1; pointer-events: none;
+  width: 4.4vh; height: 4.4vh; margin: -2.2vh 0 0 -2.2vh; border-radius: 50%;
+  border: 0.5vh solid #fff; background: color-mix(in srgb, var(--accent) 35%, transparent);
+  box-shadow: 0 0 0 0.45vh var(--accent), 0 0 3vh var(--accent);
+  opacity: 0; transition: opacity 0.3s;
+}
+.spot.on { opacity: 1; }
 
 /* Some sprites come without eyes (VS Code draws them separately). */
 .blobby.eyes::after {
@@ -415,7 +443,7 @@ body {
    app's place in that order.
    ============================================================ */
 .orbit {
-  position: relative; width: min(100%, 68vh); aspect-ratio: 1; margin-inline: auto;
+  position: relative; width: min(95%, 80vh); aspect-ratio: 1; margin-inline: auto;
   container-type: inline-size;
 }
 .orbit-lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
@@ -571,7 +599,7 @@ body {
    Reduced motion
    ============================================================ */
 @media (prefers-reduced-motion: reduce) {
-  .reveal { transition: none; }
+  .reveal, .media, .points li, .spot { transition: none; }
   .slide, .slide.active { transition: opacity 0.2s linear; transform: none; }
   .comet-layer { display: none; }
   .blobby, .blobby::after, .orbit * { animation: none !important; }
@@ -635,9 +663,9 @@ body {
           <p class="subhead reveal" style="--d:.16s">Orchestrate a team of agents</p>
           <p class="lead reveal" style="--d:.28s">Run tasks in parallel across your repositories, follow their progress, and review the changes in one place.</p>
           <ul class="points reveal" style="--d:.4s">
-            <li>Each agent works in its own worktree, so changes don't collide</li>
-            <li>Manage agents across all your workspaces and environments</li>
-            <li>Switch to the editor and back without stopping a session</li>
+            <li data-x=".62" data-y=".56" data-pose="typing">Each agent works in its own worktree, so changes don't collide</li>
+            <li data-x=".085" data-y=".13" data-pose="cool">Manage agents across all your workspaces and environments</li>
+            <li data-x=".45" data-y=".087" data-pose="press-button">Switch to the editor and back without stopping a session</li>
           </ul>
         </div>
         <div class="art reveal" style="--d:.32s">
@@ -658,9 +686,9 @@ body {
           <p class="subhead reveal" style="--d:.16s">Put recurring work on a schedule</p>
           <p class="lead reveal" style="--d:.28s">Save a prompt once and let an agent run it for you: summarize repository changes or triage issues without starting each session by hand.</p>
           <ul class="points reveal" style="--d:.4s">
-            <li><b>In the app:</b> runs on your machine with your tools, hourly, daily, weekly, or by cron</li>
-            <li><b>On GitHub:</b> runs in the cloud, even when your computer is off <span class="tag">Preview</span></li>
-            <li>Cloud automations can also react to issue and pull request events</li>
+            <li data-x=".36" data-y=".395" data-pose="press-button"><b>In the app:</b> runs on your machine with your tools, hourly, daily, weekly, or by cron</li>
+            <li data-img="1" data-x=".27" data-y=".27" data-pose="cool"><b>On GitHub:</b> runs in the cloud, even when your computer is off <span class="tag">Preview</span></li>
+            <li data-img="1" data-x=".66" data-y=".60" data-pose="typing">Cloud automations can also react to issue and pull request events</li>
           </ul>
         </div>
         <div class="art reveal" style="--d:.32s">
@@ -683,13 +711,13 @@ body {
           <p class="subhead reveal" style="--d:.16s">From pull request to merged</p>
           <p class="lead reveal" style="--d:.28s">Agent Merge watches a session's pull request on GitHub and asks the agent to clear whatever is blocking it.</p>
           <ul class="points reveal" style="--d:.4s">
-            <li>Addresses review comments and fixes failed required checks</li>
-            <li>Resolves conflicts and updates a branch that has fallen behind</li>
-            <li>Merges when ready, or leaves the merge to you</li>
+            <li data-x=".5" data-y=".725" data-pose="press-button">Addresses review comments and fixes failed required checks</li>
+            <li data-x=".55" data-y=".46" data-pose="typing">Resolves conflicts and updates a branch that has fallen behind</li>
+            <li data-x=".8" data-y=".92" data-pose="clapping">Merges when ready, or leaves the merge to you</li>
           </ul>
         </div>
         <div class="art reveal" style="--d:.32s">
-          <figure class="media" style="--mh:56vh">
+          <figure class="media">
             <span class="blobby press-button eyes" aria-hidden="true"></span>
             <img class="shot" alt="The Create pull request form with Merge Manually, Agent Merge, and Auto-Merge options"
                  src="media/03-agent-merge.png">
@@ -769,9 +797,9 @@ body {
           <p class="subhead reveal" style="--d:.16s">One harness. <br>Every Copilot surface.</p>
           <p class="lead reveal" style="--d:.28s">The Copilot harness is built on the Copilot SDK, the same foundation behind Copilot CLI, the GitHub Copilot app, cloud sessions, and code review.</p>
           <ul class="points reveal" style="--d:.4s">
-            <li>Write agent customizations once and use them in every Copilot experience</li>
-            <li>Sessions run in the Agent Host and keep going in the background</li>
-            <li>Agent Host Protocol 1.0 is open, so any client can join the same sessions</li>
+            <li data-x=".20" data-y=".27" data-pose="cool">Write agent customizations once and use them in every Copilot experience</li>
+            <li data-x=".68" data-y=".33" data-pose="typing">Sessions run in the Agent Host and keep going in the background</li>
+            <li data-x=".25" data-y=".8" data-pose="clapping">Agent Host Protocol 1.0 is open, so any client can join the same sessions</li>
           </ul>
         </div>
         <div class="art reveal" style="--d:.32s">
@@ -792,9 +820,9 @@ body {
           <p class="subhead reveal" style="--d:.16s">Your harness. Your model.</p>
           <p class="lead reveal" style="--d:.28s">Use the agent harness that works best for you: Copilot, Claude, or Codex. Choose models from Anthropic, OpenAI, Google, and Microsoft, or open-weight models.</p>
           <ul class="points reveal" style="--d:.4s">
-            <li>Claude and Codex harnesses work with your Copilot subscription</li>
-            <li>Copilot Fusion picks one model or combines several for the task</li>
-            <li>Bring your own key for other providers or local models</li>
+            <li data-x=".5" data-y=".6" data-pose="cool">Claude and Codex harnesses work with your Copilot subscription</li>
+            <li data-img="1" data-x=".47" data-y=".25" data-pose="press-button">Copilot Fusion picks one model or combines several for the task</li>
+            <li data-img="1" data-x=".5" data-y=".61" data-pose="typing">Bring your own key for other providers or local models</li>
           </ul>
         </div>
         <div class="art reveal" style="--d:.32s">
@@ -817,9 +845,9 @@ body {
           <p class="subhead reveal" style="--d:.16s">Same task. <br>Many models. <br>Keep the best.</p>
           <p class="lead reveal" style="--d:.28s">Run one prompt across 2 to 10 models or harnesses in the Agents window, then compare the results side by side.</p>
           <ul class="points reveal" style="--d:.4s">
-            <li>Each attempt works in its own Git worktree</li>
-            <li>A judge model scores the attempts and recommends one</li>
-            <li>Synthesize a new result from the best parts of several</li>
+            <li data-x=".10" data-y=".54" data-pose="typing">Each attempt works in its own Git worktree</li>
+            <li data-x=".38" data-y=".33" data-pose="clapping">A judge model scores the attempts and recommends one</li>
+            <li data-x=".88" data-y=".17" data-pose="chef-hat">Synthesize a new result from the best parts of several</li>
           </ul>
         </div>
         <div class="art reveal" style="--d:.32s">
@@ -840,9 +868,9 @@ body {
           <p class="subhead reveal" style="--d:.16s">Connect once. Context everywhere.</p>
           <p class="lead reveal" style="--d:.28s">Bring the Slack discussion behind a change, project context from Notion, or API docs from Microsoft Learn into your agent sessions.</p>
           <ul class="points reveal" style="--d:.4s">
-            <li>No MCP server to install or configure</li>
-            <li>Connect once, then reuse it across Copilot clients on the same account</li>
-            <li>On all Copilot plans; admins decide for Business and Enterprise</li>
+            <li data-x=".85" data-y=".2" data-pose="cool">No MCP server to install or configure</li>
+            <li data-x=".90" data-y=".42" data-pose="press-button">Connect once, then reuse it across Copilot clients on the same account</li>
+            <li data-x=".5" data-y=".67" data-pose="clapping">On all Copilot plans; admins decide for Business and Enterprise</li>
           </ul>
         </div>
         <div class="art reveal" style="--d:.32s">
@@ -863,9 +891,9 @@ body {
           <p class="subhead reveal" style="--d:.16s">A browser you and your agent share</p>
           <p class="lead reveal" style="--d:.28s">Preview your app inside VS Code and share the page with your agent, so it sees what you see.</p>
           <ul class="points reveal" style="--d:.4s">
-            <li>Comment on a page element to give the agent precise feedback</li>
-            <li>The agent runs the app, clicks through it, and fixes what it finds</li>
-            <li>Browser tools are built in, with no MCP server to set up</li>
+            <li data-x=".36" data-y=".6" data-pose="painting">Comment on a page element to give the agent precise feedback</li>
+            <li data-x=".595" data-y=".12" data-pose="press-button">The agent runs the app, clicks through it, and fixes what it finds</li>
+            <li data-x=".86" data-y=".34" data-pose="cool">Browser tools are built in, with no MCP server to set up</li>
           </ul>
         </div>
         <div class="art reveal" style="--d:.32s">
@@ -886,9 +914,9 @@ body {
           <p class="subhead reveal" style="--d:.16s">More than a chat box</p>
           <p class="lead reveal" style="--d:.28s">Canvases are interactive surfaces that you and your agent use together: plan on a Kanban board, inspect a diagram, or adjust controls.</p>
           <ul class="points reveal" style="--d:.4s">
-            <li>Create one for your project with <b class="mono-em">/create-canvas</b></li>
-            <li>Install ready-made canvases from the marketplace</li>
-            <li>Canvases come back with their session when you return</li>
+            <li data-x=".81" data-y=".13" data-pose="typing">Create one for your project with <b class="mono-em">/create-canvas</b></li>
+            <li data-x=".3" data-y=".33" data-pose="painting">Install ready-made canvases from the marketplace</li>
+            <li data-x=".12" data-y=".05" data-pose="cool">Canvases come back with their session when you return</li>
           </ul>
         </div>
         <div class="art reveal" style="--d:.32s">
@@ -909,9 +937,9 @@ body {
           <p class="subhead reveal" style="--d:.16s">Agents your admins can govern</p>
           <p class="lead reveal" style="--d:.28s">Set Copilot guardrails once with enterprise-managed settings and apply them across VS Code and Copilot CLI.</p>
           <ul class="points reveal" style="--d:.4s">
-            <li>Manage permission levels, models, MCP servers, and plugins</li>
-            <li>Sandboxing limits which files and networks an agent can reach</li>
-            <li>Export traces and token usage with OpenTelemetry</li>
+            <li data-img="1" data-x=".72" data-y=".48" data-pose="hard-hat">Manage permission levels, models, MCP servers, and plugins</li>
+            <li data-img="1" data-x=".86" data-y=".69" data-pose="press-button">Sandboxing limits which files and networks an agent can reach</li>
+            <li data-x=".59" data-y=".31" data-pose="typing">Export traces and token usage with OpenTelemetry</li>
           </ul>
         </div>
         <div class="art reveal" style="--d:.32s">
@@ -976,6 +1004,161 @@ body {
   }
 
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var POSES = ['idle', 'love', 'cool', 'sleep', 'typing', 'painting', 'press-button', 'clapping', 'jump', 'chef-hat', 'hard-hat'];
+  var EYES = ['love', 'typing', 'painting', 'press-button', 'clapping'];
+  var WIDTH = { sleep: 15, typing: 21, painting: 24, 'press-button': 20 };
+  var tourStep = -1, tourHold = 0;
+  var tours = slides.map(function (slide) {
+    var figure = slide.querySelector('.media'), blob = figure && figure.querySelector('.blobby');
+    if (!blob) return null; // The continuity diagram and video keep their own animations.
+    var spot = document.createElement('span');
+    spot.className = 'spot';
+    spot.setAttribute('aria-hidden', 'true');
+    figure.appendChild(spot);
+    var tour = {
+      slide: slide, figure: figure, blob: blob, spot: spot,
+      shots: Array.prototype.slice.call(figure.querySelectorAll('.shot')),
+      steps: Array.prototype.slice.call(slide.querySelectorAll('.points li')),
+      finale: POSES.filter(function (pose) { return blob.classList.contains(pose); })[0],
+      animations: [], position: null, pan: 0
+    };
+    blob.removeAttribute('aria-hidden');
+    blob.setAttribute('role', 'button');
+    blob.setAttribute('aria-label', 'Make Blobby jump');
+    blob.tabIndex = 0;
+    blob.addEventListener('click', function (event) {
+      event.stopPropagation();
+      tourHold = 1800;
+      moveBlob(tour, tour.position, 'love');
+    });
+    blob.addEventListener('keydown', function (event) {
+      if (event.code === 'Enter' || event.code === 'Space') {
+        event.preventDefault();
+        event.stopPropagation();
+        blob.click();
+      }
+    });
+    figure.addEventListener('click', function (event) {
+      var rect = figure.getBoundingClientRect();
+      tourHold = 2800;
+      showHotspot(tour, { x: event.clientX - rect.left, y: event.clientY - rect.top }, 'love');
+    });
+    return tour;
+  });
+
+  function blobUnit() { return Math.max(4, Math.round(innerHeight / 120)); }
+  function setPose(blob, pose) {
+    POSES.forEach(function (p) { blob.classList.remove(p); });
+    blob.classList.add(pose);
+    blob.classList.toggle('eyes', EYES.indexOf(pose) >= 0);
+  }
+  function stopHop(tour) {
+    tour.animations.forEach(function (a) { a.onfinish = null; a.cancel(); });
+    tour.animations = [];
+    tour.blob.classList.remove('hopping');
+  }
+  function place(p) {
+    return 'translate(' + p.x + 'px,' + p.y + 'px) translate(-50%,-100%)';
+  }
+  // Reuse the mockup's parabolic hop and jump-sheet frame sequence.
+  function moveBlob(tour, to, pose, instant) {
+    var blob = tour.blob, from = tour.position;
+    if (from) {
+      var rect = blob.getBoundingClientRect(), fig = tour.figure.getBoundingClientRect();
+      from = { x: rect.left + rect.width / 2 - fig.left, y: rect.bottom - fig.top };
+    }
+    stopHop(tour);
+    tour.position = to;
+    blob.style.transform = place(to);
+    if (!from || instant || reduceMotion) { setPose(blob, pose); return; }
+    var height = Math.min(innerHeight * 0.18, Math.max(innerHeight * 0.055, Math.hypot(to.x - from.x, to.y - from.y) * 0.3));
+    // Keep the top of the hop inside the screen, even when hopping on the perch.
+    height = Math.max(0, Math.min(height, tour.figure.getBoundingClientRect().top + Math.min(from.y, to.y) - 12 * blobUnit() - 8));
+    var keys = [{ offset: 0, transform: place(from) }, { offset: 0.16, transform: place(from) }];
+    for (var i = 1; i <= 20; i++) {
+      var k = i / 20;
+      keys.push({ offset: 0.16 + 0.7 * k, transform: place({
+        x: from.x + (to.x - from.x) * k,
+        y: from.y + (to.y - from.y) * k - 4 * height * k * (1 - k)
+      }) });
+    }
+    keys.push({ offset: 1, transform: place(to) });
+    setPose(blob, 'jump');
+    blob.classList.add('hopping');
+    var move = blob.animate(keys, { duration: 820 });
+    var sprite = blob.animate([
+      { offset: 0, backgroundPositionX: '20%', easing: 'step-end' },
+      { offset: 0.16, backgroundPositionX: '40%', easing: 'step-end' },
+      { offset: 0.26, backgroundPositionX: '60%', easing: 'step-end' },
+      { offset: 0.86, backgroundPositionX: '80%', easing: 'step-end' },
+      { offset: 1, backgroundPositionX: '100%' }
+    ], { duration: 820 });
+    tour.animations = [move, sprite];
+    move.onfinish = function () {
+      tour.animations = [];
+      blob.classList.remove('hopping');
+      setPose(blob, pose);
+    };
+  }
+  function visibleWidth(tour) {
+    return Math.min(tour.figure.offsetWidth, innerWidth - tour.figure.parentElement.getBoundingClientRect().left - tour.figure.offsetLeft);
+  }
+  function panTo(tour, pan) {
+    tour.pan = pan;
+    tour.figure.style.setProperty('--pan', -pan + 'px');
+  }
+  function perch(tour, instant) {
+    panTo(tour, 0);
+    tour.spot.classList.remove('on');
+    tour.slide.classList.remove('touring');
+    tour.steps.forEach(function (li) { li.classList.remove('on'); });
+    moveBlob(tour, { x: visibleWidth(tour) * 0.8, y: 0 }, tour.finale, instant);
+  }
+  function showHotspot(tour, point, pose, instant) {
+    var width = visibleWidth(tour), margin = innerHeight * 0.06, pan = tour.pan;
+    if (point.x < pan + margin) pan = point.x - margin;
+    else if (point.x > pan + width - margin) pan = point.x - width + margin;
+    panTo(tour, Math.max(0, Math.min(tour.figure.offsetWidth - width, pan)));
+    tour.spot.style.left = point.x + 'px';
+    tour.spot.style.top = point.y + 'px';
+    tour.spot.classList.add('on');
+    var half = (WIDTH[pose] || 12) * blobUnit() / 2, ring = tour.spot.offsetWidth / 2;
+    var side = point.x - tour.pan > width * 0.65 ? -1 : 1;
+    moveBlob(tour, {
+      x: Math.max(tour.pan + half + 8, Math.min(tour.pan + width - half - 8, point.x + side * (ring + half + blobUnit()))),
+      y: Math.max(12 * blobUnit(), point.y + ring * 0.7)
+    }, pose, instant);
+  }
+  function showStep(tour, index, instant) {
+    var li = tour.steps[index], img = tour.shots[Number(li.dataset.img || 0)];
+    var x = Number(li.dataset.x), y = Number(li.dataset.y);
+    if (!img || !Number.isFinite(x) || !Number.isFinite(y) || !POSES.includes(li.dataset.pose)) {
+      throw new Error('Invalid Blobby hotspot on ' + tour.slide.dataset.label);
+    }
+    tour.slide.classList.add('touring');
+    tour.steps.forEach(function (step, i) { step.classList.toggle('on', i === index); });
+    showHotspot(tour, { x: img.offsetLeft + img.offsetWidth * x, y: img.offsetTop + img.offsetHeight * y }, li.dataset.pose, instant);
+  }
+  function updateTour() {
+    var tour = tours[current];
+    if (!tour || !tour.steps.length) return;
+    var stepTime = (durOf(current) - 2600) / tour.steps.length;
+    var index = Math.min(tour.steps.length, Math.floor((elapsed - 1000) / stepTime));
+    if (index < 0 || index === tourStep) return;
+    tourStep = index;
+    if (index < tour.steps.length) showStep(tour, index);
+    else perch(tour);
+  }
+  function refreshTour() {
+    var tour = tours[current];
+    if (!tour) return;
+    if (tourStep >= 0 && tourStep < tour.steps.length) showStep(tour, tourStep, true);
+    else perch(tour, true);
+  }
+  function pauseHop() {
+    var tour = tours[current];
+    if (tour) tour.animations.forEach(function (a) { if (paused || tocOpen) a.pause(); else a.play(); });
+  }
 
   // Videos play only while their slide is showing, and start from the top.
   function setVideos(slide, play) {
@@ -988,6 +1171,10 @@ body {
   }
 
   function go(i) {
+    if (tours[current]) {
+      stopHop(tours[current]);
+      tours[current].position = null;
+    }
     slides[current].classList.remove('active');
     setVideos(slides[current], false);
     current = (i % slides.length + slides.length) % slides.length;
@@ -996,7 +1183,11 @@ body {
     setVideos(s, true);
     carousel.style.setProperty('--accent', (s.style.getPropertyValue('--accent') || '#0078d4').trim());
     carousel.style.setProperty('--accent-ink', (s.style.getPropertyValue('--accent-ink') || '#005fb8').trim());
-    elapsed = 0;
+    elapsed = 0; tourStep = -1; tourHold = 0;
+    if (tours[current]) {
+      tours[current].position = null;
+      perch(tours[current], true);
+    }
     markCurrentInToc();
   }
   function next() { go(current + 1); }
@@ -1007,7 +1198,9 @@ body {
     var dt = ts - last;
     last = ts;
     if (!paused && !tocOpen) {
-      elapsed += dt;
+      if (tourHold > 0) tourHold = Math.max(0, tourHold - dt);
+      else elapsed += dt;
+      updateTour();
       if (elapsed >= durOf(current)) next();
     }
     requestAnimationFrame(frame);
@@ -1016,6 +1209,7 @@ body {
   function setPaused(p) {
     paused = p;
     carousel.classList.toggle('paused', paused);
+    pauseHop();
   }
 
   // ---- Table of contents (toggled with the ` backtick key) ----
@@ -1023,11 +1217,14 @@ body {
     tocOpen = true;
     carousel.classList.add('toc-open');
     markCurrentInToc();
+    pauseHop();
   }
   function closeToc() {
     tocOpen = false;
     carousel.classList.remove('toc-open');
     elapsed = 0; last = null; // resume cleanly from the chosen slide
+    tourStep = -1; tourHold = 0;
+    if (tours[current]) perch(tours[current], true);
   }
   function toggleToc() { tocOpen ? closeToc() : openToc(); }
 
@@ -1041,6 +1238,7 @@ body {
       case 'ArrowRight': e.preventDefault(); if (!tocOpen) next(); break;
       case 'ArrowLeft': e.preventDefault(); if (!tocOpen) prev(); break;
       case 'Home': e.preventDefault(); closeToc(); go(0); break;
+      case 'KeyJ': if (!tocOpen && tours[current]) tours[current].blob.click(); break;
       case 'KeyF':
         if (!document.fullscreenElement) {
           (document.documentElement.requestFullscreen || function () {}).call(document.documentElement);
@@ -1056,26 +1254,33 @@ body {
   // The continuity circle scales its pixel art with its own width.
   function setPixelUnit() {
     document.documentElement.style.setProperty('--px', Math.max(4, Math.round(window.innerHeight / 90)) + 'px');
+    document.documentElement.style.setProperty('--bu', blobUnit() + 'px');
     Array.prototype.forEach.call(document.querySelectorAll('.orbit'), function (orbit) {
       orbit.style.setProperty('--px', Math.max(3, Math.round(orbit.clientWidth / 59)) + 'px');
     });
   }
   setPixelUnit();
-  window.addEventListener('resize', setPixelUnit);
+  window.addEventListener('resize', function () { setPixelUnit(); refreshTour(); });
 
-  // Give each figure with one screenshot or video that media's aspect ratio,
-  // which the CSS uses to size it.
-  Array.prototype.forEach.call(document.querySelectorAll('.media .shot'), function (el) {
-    var figure = el.closest('.media');
-    if (figure.querySelectorAll('.shot').length !== 1) return;
-    var isVideo = el.tagName === 'VIDEO';
+  // Composite ratios keep stacked and overlapping screenshots within the same height budget.
+  Array.prototype.forEach.call(document.querySelectorAll('.media'), function (figure) {
+    var shots = Array.prototype.slice.call(figure.querySelectorAll('.shot'));
     function setRatio() {
-      var w = isVideo ? el.videoWidth : el.naturalWidth;
-      var h = isVideo ? el.videoHeight : el.naturalHeight;
-      if (w && h) figure.style.setProperty('--ar', (w / h).toFixed(4));
+      var ratios = shots.map(function (el) {
+        return el.tagName === 'VIDEO' ? el.videoWidth / el.videoHeight : el.naturalWidth / el.naturalHeight;
+      });
+      if (!ratios.every(function (r) { return Number.isFinite(r) && r > 0; })) return; // Wait for all media to load.
+      var ratio = ratios[0];
+      if (figure.classList.contains('stack')) ratio = 1 / ratios.reduce(function (sum, r) { return sum + 1 / r; }, 0);
+      if (figure.classList.contains('duo')) {
+        var over = parseFloat(getComputedStyle(figure).getPropertyValue('--over')) / 100 || 0.5;
+        ratio = 1 / Math.max(0.88 / ratio + 0.07, over / ratios[1]);
+      }
+      figure.style.setProperty('--ar', ratio.toFixed(4));
+      if (figure.closest('.slide') === slides[current]) refreshTour();
     }
-    if (isVideo ? el.readyState >= 1 : el.complete) setRatio();
-    else el.addEventListener(isVideo ? 'loadedmetadata' : 'load', setRatio);
+    shots.forEach(function (el) { el.addEventListener(el.tagName === 'VIDEO' ? 'loadedmetadata' : 'load', setRatio); });
+    setRatio();
   });
 
   // Don't fast-forward after the tab was hidden
